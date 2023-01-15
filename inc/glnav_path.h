@@ -2,13 +2,15 @@
 #define GLNAV_PATH_H
 
 #include "glnav_point.h"
+#include "glnav_cartesian.h"
 #include <assert.h>
 #include <stdexcept>
+#include <list>
 
 namespace glnav
 {
     template<typename T>
-    class path
+    class path : public cartesian_2d_object<T>
     {
     public:
         point<T> start;
@@ -61,6 +63,55 @@ namespace glnav
             result -= rhs;
             return result;
         }
+
+        std::list<point<T> > operator/(const size_t segments)
+        {
+            if(segments == 0) throw std::invalid_argument("Must have at least one segment");
+            std::list<path<T> > result;
+            result.push_back(this->start);
+            if(segments == 1)
+            {
+                result.push_back(this->end);
+            }
+            else if(this->is_point())
+            {
+                // Do nothing
+            }
+            else
+            {
+                const T x_delta = (this->end.x - this->start.x) / segments;
+                const T y_delta = (this->end.y - this->start.y) / segments;
+                point<T> delta(x_delta, y_delta);
+                point<T> next = this->start + delta;
+                for(size_t i = 1; i < segments - 1; i++)
+                {
+                    result.push_back(next);
+                    next += delta;
+                }
+                result.push_back(this->end);
+            }
+            return result;
+        }
+
+        /*
+        std::list<path<T> > subdivide_by_count(const size_t segments)
+        {
+            #error todo
+        }
+
+        std::list<path<T> > subdivide_by_length(const double max_length)
+        {
+            std::list<path<T> > result;
+            const double length = this->length();
+            if(length < max_length)
+            {
+                result.push_back(*this);
+                return result;
+            }
+            const size_t segments = (size_t)(this->length() / max_length) + 1;
+            #error finish
+        }
+        */
 
         /*! \brief Determines if the paths are parallel
          * 
@@ -116,6 +167,11 @@ namespace glnav
             return this->as_vector().magnitudel();
         }
 
+        virtual double cost() const
+        {
+            return this->length();
+        }
+
         /*! \brief Checks connection to another path 
          *
          * \return True if this path starts or ends on the other path's start or end points, false otherwise
@@ -131,6 +187,7 @@ namespace glnav
         bool contains_point(const point<T> &input, const bool include_endpoints) const
         {
             if(input == this->start || input == this->end) return include_endpoints;
+            if(!this->could_contain(input, include_endpoints)) return false;
             path<T> tranlsated = *this - input;
             return tranlsated.start.cross(tranlsated.end) == 0
                     && tranlsated.start.dot(tranlsated.end) < 0;
@@ -161,11 +218,7 @@ namespace glnav
          */
         bool could_intersect(const path<T> &other) const
         {
-            if(this->minX() > other.maxX()) return false;
-            if(this->maxX() < other.minX()) return false;
-            if(this->minY() > other.maxY()) return false;
-            if(this->maxY() < other.minY()) return false;
-            return true;
+            return this->could_overlap(other, true);
         }
 
         bool intersects(const path &other, const bool terminate_without_intersect) const
