@@ -7,7 +7,7 @@
 namespace glnav
 {
     template<typename T>
-    class cartesian_2d_object
+    class cartesian_object
     {
     public:
         virtual T minX() const = 0;
@@ -15,7 +15,7 @@ namespace glnav
         virtual T minY() const = 0;
         virtual T maxY() const = 0;
 
-        bool could_overlap(const cartesian_2d_object &other, const bool include_border) const
+        bool could_overlap(const cartesian_object &other, const bool include_border) const
         {
             assert(this->minX() <= this->maxX());
             assert(this->minY() <= this->maxY());

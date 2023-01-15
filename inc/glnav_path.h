@@ -10,7 +10,7 @@
 namespace glnav
 {
     template<typename T>
-    class path : public cartesian_2d_object<T>
+    class path : public cartesian_object<T>
     {
     public:
         point<T> start;

@@ -12,7 +12,7 @@ namespace glnav
         point() : x(0), y(0) { }
         point(const T xseed, const T yseed) : x(xseed), y(yseed) { }
         point(const point &other) : x(other.x), y(other.y) { }
-        point& operator=(const point &other) { this->x = other.x; this->y = other.y; }
+        point& operator=(const point &other) { this->x = other.x; this->y = other.y; return *this; }
         T x;
         T y;
         point& operator+=(const point &other)
