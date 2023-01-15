@@ -271,18 +271,18 @@ namespace glnav
             }
             if(this->overlaps(other)) return true;
 
+            // Check for starting or ending on each other
+            if(this->contains_point(other.start, false)) return !terminate_without_intersect;
+            if(this->contains_point(other.end, false)) return !terminate_without_intersect;
+            if(other.contains_point(this->start, false)) return !terminate_without_intersect;
+            if(other.contains_point(this->end, false)) return !terminate_without_intersect;
+
             // At this point, they must either intersect in the middle of each other
             // or they do not intersect
             const path translated = other - this->end;
             const point<T> vec = this->as_vector();
             const T start_cross = vec.cross(translated.start);
             const T end_cross = vec.cross(translated.end);
-            const T start_dot = vec.dot(translated.start);
-            const T end_dot = vec.dot(translated.end);
-
-            // The following two cases should have been addressed by ::_regional_overlap()
-            assert(start_dot >= 0);
-            assert(end_dot >= 0);
 
             if(start_cross > 0 && end_cross > 0) return false; // Other is to the right of this
             if(start_cross < 0 && end_cross < 0) return false; // Other is to the left of this

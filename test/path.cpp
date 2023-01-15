@@ -33,8 +33,21 @@ test_case test_cases[] =
     { 1, 2, 3, 4, 1, 6, 3, 8, false, false }, // Completely above
     { 1, 2, 3, 4, 1, 6, 3, 8, true, false }, // Completely above
     { 1, 2, 3, 4, 1, -2, 3, -1, false, false }, // Completely below
-    { 1, 2, 3, 4, 1, -2, 3, -1, true, false } // Completely below
-    
+    { 1, 2, 3, 4, 1, -2, 3, -1, true, false }, // Completely below
+    { -5, -5, 5, 5, 1, 2, 2, 3, false, false }, // Close but not touching
+    { -5, -5, 5, 5, -1, -2, 2, 1, false, false }, // Close but not touching
+    { -5, -5, 5, 5, -6, -6, -4, -4, false, true }, // Overlapping
+    { -5, -5, 5, 5, -6, -6, 6, 6, false, true }, // Overlapping
+    { -5, -5, 5, 5, -4, -4, 4, 4, false, true }, // Overlapping
+    { -5, -5, 5, 5, -5, 5, 5, -5, false, true }, // Crossing
+    { -5, -5, 5, 5, 0, 0, 5, -5, true, false }, // Starts on
+    { -5, -5, 5, 5, 0, 0, 5, -5, false, true }, // Starts on
+    { -5, -5, 5, 5, -5, 5, 0, 0, true, false }, // Ends on
+    { -5, -5, 5, 5, -5, 5, 0, 0, false, true }, // Ends on
+    { 0, 0, 5, 5, -5, 5, 5, -5, true, false }, // Starts on
+    { 0, 0, 5, 5, -5, 5, 5, -5, false, true }, // Starts on
+    { -5, -5, 0, 0, -5, 5, 5, -5, true, false }, // Ends on
+    { -5, -5, 0, 0, -5, 5, 5, -5, false, true } // Ends on
 };
 
 int main(void)
