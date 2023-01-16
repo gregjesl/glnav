@@ -152,13 +152,83 @@ namespace glnav
     };
 
     template<typename T>
-    class point_group : public std::set<point<T> >
+    class fixed_point : private point<T>
+    {
+    public:
+        fixed_point(const T x, const T y) : point<T>(x, y),
+            __magnitude_squared(point<T>::magnitude_squared()),
+            __magnitude(sqrt(this->__magnitude_squared))
+        { }
+
+        fixed_point(const point<T> &other) : point<T>(other),
+            __magnitude_squared(point<T>::magnitude_squared()),
+            __magnitude(sqrt(this->__magnitude_squared))
+        { }
+
+        fixed_point& operator=(const point<T> &other)
+        {
+            point<T>::operator=(other);
+            this->__magnitude_squared = point<T>::magnitude_squared();
+            this->__magnitude = point<T>::magnitude();
+            return *this;
+        }
+
+        const T& x() const { return point<T>::x; }
+        const T& y() const { return point<T>::y; }
+
+        fixed_point operator+(const point<T> &other) const
+        {
+            return fixed_point(point<T>::operator+(other));
+        }
+
+        fixed_point operator-(const point<T> &other) const
+        {
+            return fixed_point(point<T>::operator-(other));
+        }
+
+        bool operator==(const fixed_point<T> &other) const
+        {
+            return this->x() == other.x() && this->y() == other.y();
+        }
+
+        bool operator!=(const fixed_point<T> &other) const
+        {
+            return this->x() != other.x() || this->y() != other.y();
+        }
+
+        bool operator<(const fixed_point &other) const
+        {
+            if(this->__magnitude_squared < other.__magnitude_squared) return true;
+            if(this->__magnitude_squared > other.__magnitude_squared) return false;
+            return this->x() > other.x();
+        }
+
+        bool operator>(const fixed_point &other) const
+        {
+            if(this->__magnitude_squared > other.__magnitude_squared) return true;
+            if(this->__magnitude_squared < other.__magnitude_squared) return false;
+            return this->x() < other.x();
+        }
+
+        using point<T>::cross;
+        using point<T>::dot;
+
+        double magnitude() const { return this->__magnitude; }
+
+        using point<T>::is_between;
+    private:
+        T __magnitude_squared;
+        double __magnitude;
+    };
+
+    template<typename T>
+    class point_group : public std::set<fixed_point<T> >
     {
     public:
         #if __cplusplus < 202002L
-        bool contains(const point<T> &key)  const
+        bool contains(const fixed_point<T> &key)  const
         {
-            return this->find(key) == this->end();
+            return this->find(key) != this->end();
         }
         #endif
         point_group translate(const T deltaX, const T deltaY)
