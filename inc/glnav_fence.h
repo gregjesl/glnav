@@ -3,12 +3,13 @@
 
 #include "glnav_cartesian.h"
 #include "glnav_path.h"
+#include "glnav_pin.h"
 #include <vector>
 
 namespace glnav
 {
     template<typename T>
-    class fence : virtual public cartesian_object<T>, private std::vector<point<T> *>
+    class fence : virtual public cartesian_object<T>, protected std::vector<point<T> *>
     {
     public:
         fence(const point<T> &start, const point<T> &end)
@@ -82,16 +83,57 @@ namespace glnav
                 && this->minY() == this->maxY();
         }
 
-        bool obstructs(const path<T> &input) const
+        virtual bool obstructs(const path<T> &input) const
         {
             // Check for fast elimination
             if(!this->could_overlap(input, true)) return false;
+            if(this->is_point()) return false;
 
             // Iterate through the paths
             for(size_t i = 1; i < this->size(); i++)
             {
                 const path<T> segment(*this->at(i-1), *this->at(i));
+                if(input.intersects(segment, true)) return true;
             }
+
+            // Iterate through the pins
+            for(size_t i = 1; i < this->size() - 1; i++)
+            {
+                const pin<T> test(*this->at(i), *this->at(i-1), *this->at(i+1));
+                if(input.contains_point(test, false))
+                {
+                    if(test.blocks(input.start, input.end)) return true;
+                }
+            }
+            return false;
+        }
+
+        /*! \brief Finds unobstructed paths to a target */
+        std::vector<path<T> > to(const point<T> &target) const
+        {
+            std::vector<path<T> > result;
+            assert(this->size() > 1);
+            for(size_t i = 0; i < this->size(); i++)
+            {
+                const path<T> test(*this->at(i), target);
+                if(this->obstructs(test)) continue;
+                result.push_back(test);
+            }
+            assert(result.size() > 0);
+        }
+
+        /*! \brief Finds unobstructed paths to a target */
+        std::vector<path<T> > from(const point<T> &origin) const
+        {
+            std::vector<path<T> > result;
+            assert(this->size() > 1);
+            for(size_t i = 0; i < this->size(); i++)
+            {
+                const path<T> test(origin, *this->at(i));
+                if(this->obstructs(test)) continue;
+                result.push_back(test);
+            }
+            assert(result.size() > 0);
         }
     private:
         T __minX;

@@ -2,6 +2,7 @@
 #define GLNAV_POINT_H
 
 #include <math.h>
+#include <stdexcept>
 
 namespace glnav
 {
@@ -91,6 +92,42 @@ namespace glnav
         long double anglel() const
         {
             return atan2l(this->y, this->x);
+        }
+
+        /*! \brief Determiens if a point lies within the concave section defined by two legs
+         *
+         * From https://stackoverflow.com/questions/13640931/how-to-determine-if-a-vector-is-between-two-other-vectors
+         * 
+         * \warning Will return `true` if this is the same as the reference
+         */
+        bool is_between(const point<T> &reference, point<T> leg1, point<T> leg2) const
+        {
+            const point<T> test = *this - reference;
+            leg1 -= reference;
+            leg2 -= reference;
+            (void)reference;
+
+            const T leg1_cross_leg2 = leg1.cross(leg2);
+            const T leg2_cross_leg1 = leg2.cross(leg1);
+
+            // Handle the case where the pin is in a line
+            if(leg1_cross_leg2 == 0) throw std::invalid_argument("Legs are parallel");
+
+            return leg1.cross(test) * leg1_cross_leg2 >= 0
+                && leg2.cross(test) * leg2_cross_leg1 >= 0;
+        }
+
+        enum defined_rotation
+        {
+            eighth_clockwise,
+            eighth_counterclockwise,
+            quarter_clockwise,
+            quarter_counterclockwise
+        };
+
+        point<T>& rotate(const point<T> &around, const enum defined_rotation)
+        {
+            (void)around;
         }
     };
 }
