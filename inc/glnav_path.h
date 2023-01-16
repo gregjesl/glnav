@@ -137,6 +137,22 @@ namespace glnav
             return !operator==(other);
         }
 
+        bool operator<(const path &other) const
+        {
+            if(this->start < other.start) return true;
+            if(this->start > other.start) return false;
+            assert(this->start == other.start);
+            return this->end < other.end;
+        }
+
+        bool operator>(const path &other) const
+        {
+            if(this->start > other.start) return true;
+            if(this->start < other.start) return false;
+            assert(this->start == other.start);
+            return this->end > other.end;
+        }
+
         bool is_point() const
         {
             return this->start == this->end;
