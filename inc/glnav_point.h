@@ -44,9 +44,22 @@ namespace glnav
         {
             return this->x == other.x && this->y == other.y;
         }
+
         bool operator!=(const point &other) const
         {
             return this->x != other.x || this->y != other.y;
+        }
+
+        bool operator<(const point &other) const
+        {
+            if(this->magnitude_squared() < other.magnitude_squared()) return true;
+            return this->x > other.x;
+        }
+
+        bool operator>(const point &other) const
+        {
+            if(this->magnitude_squared() > other.magnitude_squared()) return true;
+            return this->x > other.x;
         }
         
         T dot(const point &other) const
