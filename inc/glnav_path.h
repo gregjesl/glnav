@@ -302,47 +302,6 @@ namespace glnav
                 return ends.cross(other_vec) < 0;
             }
         }
-
-        bool crosses(const point<T> fence[3])
-        {
-            const point<T> &bottom = fence[0];
-            const point<T> &center = fence[1];
-            const point<T> &top = fence[2];
-            const path<T> top_path(top, center);
-            const path<T> bottom_path(bottom, center);
-
-            // Validate input
-            if(top == bottom || top == center || bottom == center) throw std::invalid_argument("Invalid fence");
-
-            // Check for trivial cases
-            if(this->start == top || this->start == center || this->start == bottom) return false;
-            if(this->end == top || this->end == center || this->end == bottom) return false;
-
-            // Check for changing cross signs
-            const point<T> to_top = top - center;
-            const point<T> to_bottom = bottom - center;
-            const point<T> to_start = this->start - center;
-            const point<T> to_end = this->end - center;
-            const T cross_top_start = to_top.cross(to_start);
-            const T cross_top_end = to_top.cross(to_end);
-            const T cross_bottom_start = to_bottom.cross(to_start);
-            const T cross_bottom_end = to_bottom.cross(to_end);
-
-            // 3^4 cases to consider
-
-            // Handle the case where the path skims the fence
-            if(cross_top_start == 0
-                || cross_top_end == 0
-                || cross_bottom_start == 0 
-                || cross_top_end == 0
-            ) return false;
-            
-            // Now 2^4 cases to handle
-
-            // Handle the case where start and end are on one side of the fence
-            // Use the dot product
-
-        }
     };
 }
 
