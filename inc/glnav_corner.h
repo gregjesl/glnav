@@ -52,10 +52,10 @@ namespace glnav
                 || this->obstructs(glnav::path<T>(this->__center, input.end));
         }
 
-        virtual std::vector<point<T> > corners() const
+        virtual point_group<T> corners() const
         {
-            std::vector<point<T> > result;
-            result.push_back(this->__center);
+            point_group<T> result;
+            result.insert(this->__center);
             return result;
         }
     private:

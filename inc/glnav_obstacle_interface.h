@@ -12,7 +12,7 @@ namespace glnav
     {
     public:
         virtual bool obstructs(const path<T> &input) const = 0;
-        virtual std::vector<point<T> > corners() const = 0;
+        virtual point_group<T> corners() const = 0;
     };
 }
 
