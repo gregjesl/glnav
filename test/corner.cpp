@@ -70,4 +70,22 @@ int main(void)
         // Passes through obstructs
         TEST_TRUE(test.obstructs(glnav::path<int>(0, 0, 2, 2)));
     }
+
+    // Comparison
+    {
+        const glnav::point<int> center(1, 1);
+        const glnav::point<int> leg1(1, 3);
+        const glnav::point<int> leg2(-1, 1);
+        const glnav::point<int> outside(2, 0);
+        const glnav::corner<int> test(center, leg1, leg2, outside);
+
+        const glnav::point<int> leg3(1, 2);
+        const glnav::point<int> leg4(0, 1);
+        const glnav::corner<int> test2(center, leg3, leg4, outside);
+
+        TEST_TRUE(test == test2);
+
+        const glnav::corner<int> test3(center, leg3, leg4, true);
+        TEST_TRUE(test == test3);
+    }
 }

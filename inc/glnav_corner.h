@@ -22,6 +22,31 @@ namespace glnav
             if(center == outside) throw std::invalid_argument("Outside reference is not valid");
         }
 
+        corner(const point<T> &center, const point<T> &leg1, const point<T> &leg2, const bool clockwise)
+            : __center(center), 
+            __leg1(leg1 - center), 
+            __leg2(leg2 - center),
+            __leg1_cross_leg2(this->__leg1.cross(this->__leg2)),
+            __leg2_cross_leg1(this->__leg2.cross(this->__leg1)),
+            __concave(this->__leg1.cross(this->__leg2) > 0 ? !clockwise : clockwise)
+        {
+            if(this->__leg1.cross(this->__leg2) == 0) throw std::invalid_argument("Is not a corner");
+        }
+
+        bool operator==(const corner &other) const
+        {
+            if(this->__center != other.__center) return false;
+            if(this->__leg1.cross(other.__leg1) != 0 || this->__leg1.cross(other.__leg1) < 0) return false;
+            if(this->__leg2.cross(other.__leg2) != 0 || this->__leg2.cross(other.__leg2) < 0) return false;
+            if(this->__concave != other.__concave) return false;
+            return true;
+        }
+
+        bool operator!=(const corner &other) const
+        {
+            return !operator==(other);
+        }
+
         virtual bool obstructs(const path<T> &input) const
         {
             assert(!input.is_point());
