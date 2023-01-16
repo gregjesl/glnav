@@ -2,6 +2,7 @@
 #define GLNAV_POINT_H
 
 #include <math.h>
+#include <set>
 #include <stdexcept>
 
 namespace glnav
@@ -52,14 +53,20 @@ namespace glnav
 
         bool operator<(const point &other) const
         {
-            if(this->magnitude_squared() < other.magnitude_squared()) return true;
+            const T mag_this = this->magnitude_squared();
+            const T mag_other = other.magnitude_squared();
+            if(mag_this < mag_other) return true;
+            if(mag_this > mag_other) return false;
             return this->x > other.x;
         }
 
         bool operator>(const point &other) const
         {
-            if(this->magnitude_squared() > other.magnitude_squared()) return true;
-            return this->x > other.x;
+            const T mag_this = this->magnitude_squared();
+            const T mag_other = other.magnitude_squared();
+            if(mag_this > mag_other) return true;
+            if(mag_this < mag_other) return false;
+            return this->x < other.x;
         }
         
         T dot(const point &other) const
@@ -141,6 +148,28 @@ namespace glnav
         point<T>& rotate(const point<T> &around, const enum defined_rotation)
         {
             (void)around;
+        }
+    };
+
+    template<typename T>
+    class point_group : public std::set<point<T> >
+    {
+    public:
+        #if __cplusplus < 202002L
+        bool contains(const point<T> &key)  const
+        {
+            return this->find(key) == this->end();
+        }
+        #endif
+        point_group translate(const T deltaX, const T deltaY)
+        {
+            const point<T> delta(deltaX, deltaY);
+            point_group result;
+            for(typename point_group::const_iterator it = this->begin(); it != this->end(); ++it)
+            {
+                result.insert((*it) + delta);
+            }
+            return result;
         }
     };
 }
