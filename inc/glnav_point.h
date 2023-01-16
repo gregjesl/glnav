@@ -225,12 +225,23 @@ namespace glnav
     class point_group : public std::set<fixed_point<T> >
     {
     public:
+        point_group() : std::set<fixed_point<T> >() { }
+        point_group(const std::vector<point<T> > &seed)
+            : std::set<fixed_point<T> >()
+        {
+            for(size_t i = 0; i < seed.size(); i++)
+            {
+                this->insert(seed.at(i));
+            }
+        }
+
         #if __cplusplus < 202002L
         bool contains(const fixed_point<T> &key)  const
         {
             return this->find(key) != this->end();
         }
         #endif
+
         point_group translate(const T deltaX, const T deltaY)
         {
             const point<T> delta(deltaX, deltaY);
@@ -238,6 +249,16 @@ namespace glnav
             for(typename point_group::const_iterator it = this->begin(); it != this->end(); ++it)
             {
                 result.insert((*it) + delta);
+            }
+            return result;
+        }
+
+        operator std::vector<point<T> >()
+        {
+            std::vector<point<T> > result;
+            for(typename point_group::const_iterator it = this->begin(); it != this->end(); ++it)
+            {
+                result.push_back((*it));
             }
             return result;
         }
