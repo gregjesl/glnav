@@ -269,7 +269,7 @@ namespace glnav
                     assert(other.is_point());
                     return !terminate_without_intersect;
                 }
-                assert(this->overlaps(other));
+                assert(this->overlaps(other) || *this == other);
                 return true;
             }
             assert(*this != other);

@@ -30,7 +30,11 @@ int main(void)
     test_path = glnav::path<int>(-1, -1, 3, 3);
     TEST_TRUE(test_obs.obstructs(test_path));
 
-    // Test along wall
+    // Test overlapping wall
     test_path = glnav::path<int>(-1, 0, 3, 0);
+    TEST_FALSE(test_obs.obstructs(test_path));
+
+    // Test along wall
+    test_path = glnav::path<int>(0, 2, 2, 2);
     TEST_FALSE(test_obs.obstructs(test_path));
 }

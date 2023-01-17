@@ -120,8 +120,8 @@ namespace glnav
                 index == 0 ? this->__corners.back() : this->__corners.at(index - 1),
                 this->__corners.at(index)
             );
+            if(input == wall || input.overlaps(wall)) return false;
             if(input.terminates_within(wall)) return true;
-            if(input.overlaps(wall)) return false;
             return wall.intersects(input, true);
         }
 
