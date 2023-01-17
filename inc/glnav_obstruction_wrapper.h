@@ -13,7 +13,9 @@ namespace glnav
     public:
         obstruction_wrapper(const obstacle_interface<T> *source)
             : __source(source)
-        { }
+        { 
+            if(source == NULL) throw std::invalid_argument("Source is null");
+        }
 
         virtual bool obstructs(const path<T> &input) const
         {
@@ -23,8 +25,23 @@ namespace glnav
                 return it->second;
 
             // Not found in cache
+            return this->__source->obstructs(input);
+        }
+
+        virtual bool obstructs(const path<T> &input, const bool use_cache) const
+        {
+            // Check for cache
+            if(use_cache)
+            {
+                typename map_t::const_iterator it = this->__cache.find(input);
+                if(it != this->__cache.end())
+                    return it->second;
+            }
+
+            // Not found in cache
             const bool result = this->__source->obstructs(input);
-            this->__cache.insert(input, result);
+            if(cache)
+                this->__cache.insert(input, result);
             return result;
         }
 
