@@ -122,6 +122,11 @@ namespace glnav
             return this->as_vector().cross(input.as_vector()) == 0;
         }
 
+        point<T> center() const
+        {
+            return point<T>((this->start.x + this->end.x) / 2, (this->start.y + this->end.y) / 2);
+        }
+
         bool operator==(const path &other) const
         {
             const bool result = (this->start == other.start && this->end == other.end)
@@ -139,18 +144,31 @@ namespace glnav
 
         bool operator<(const path &other) const
         {
-            if(this->start < other.start) return true;
-            if(this->start > other.start) return false;
-            assert(this->start == other.start);
-            return this->end < other.end;
-        }
+            // Check for same
+            if(*this == other) return false;
 
-        bool operator>(const path &other) const
-        {
-            if(this->start > other.start) return true;
-            if(this->start < other.start) return false;
-            assert(this->start == other.start);
-            return this->end > other.end;
+            // Prefer shorter
+            const T current = this->length_squared();
+            const T other_mag = other.length_squared();
+            if(current < other_mag) return true;
+            if(current > other_mag) return false;
+            assert(current == other_mag);
+
+            // Prefer the one centered closer
+            const point<T> current_center = this->center();
+            const point<T> other_center = other.center();
+            if(current_center < other_center) return true;
+            if(current_center > other_center) return false;
+            assert(current_center == other_center);
+            assert(!this->is_point() && !other.is_point());
+
+            // Prefer flatter
+            float current_angle = this->as_vector().anglef();
+            if(current_angle < 0.0f) current_angle += M_PI;
+            float other_angle = other.as_vector().anglef();
+            if(other_angle < 0.0f) other_angle += M_PI;
+            assert(current_angle != other_angle);
+            return current_angle < other_angle;
         }
 
         bool is_point() const
