@@ -116,7 +116,7 @@ namespace glnav
                 index == 0 ? this->__corners.back() : this->__corners.at(index - 1),
                 this->__corners.at(index)
             );
-            return wall.intersects(input, true);
+            return wall.intersects(input, false);
         }
 
         bool __sides_obstruct(const path<T> &input)
