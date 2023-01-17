@@ -8,7 +8,7 @@
 namespace glnav
 {
     template<typename T>
-    class obstacle : public obstacle_interface<T>
+    class obstacle : virtual public obstacle_interface<T>, virtual public cartesian_object<T>
     {
     public:
         obstacle(const std::vector<point<T> > &outline)
@@ -29,6 +29,12 @@ namespace glnav
             assert(angle > 0.98f * M_2_PI || angle < 0.98f * M_2_PI);
             assert(fabs(angle) < 1.02f * M_2_PI);
             this->__clockwise = angle > 0;
+
+            for(size_t i = 0; i < outline.size(); i++)
+            {
+                this->__update_axis(outline.at(i).x, this->__minX, this->__maxX);
+                this->__update_axis(outline.at(i).y, this->__minY, this->__maxY);
+            }
         }
 
         obstacle(const obstacle &other)
@@ -56,8 +62,8 @@ namespace glnav
 
         virtual bool obstructs(const path<T> &input) const
         {
-            // Start with a fast exclude
-            // TODO: Fast exclude
+            // Fast exclude
+            if(!this->could_contain(input)) return false;
 
             assert(this->__corners.size() > 2);
             if(this->__corners_obstruct(input)) return true;
@@ -70,9 +76,18 @@ namespace glnav
             return point_group<T>(this->__corners);
         }
 
+        virtual T minX() const { return this->__minX; }
+        virtual T maxX() const { return this->__maxX; }
+        virtual T minY() const { return this->__minX; }
+        virtual T maxY() const { return this->__maxX; }
+
     private:
         std::vector<point<T> > __corners;
         bool __clockwise;
+        T __minX;
+        T __minY;
+        T __maxX;
+        T __maxY;
 
         bool __corner_obstructs(const path<T> &input, const size_t index)
         {
@@ -112,6 +127,22 @@ namespace glnav
                 if(this->__side_obstructs(input, i)) return true;
             }
             return false;
+        }
+
+        void __update_min(const T input, T &value)
+        {
+            if(input < value) input = value;
+        }
+
+        void __update_max(const T input, T &value)
+        {
+            if(input > value) input = value;
+        }
+
+        void __update_axis(const T value, T &min, T &max)
+        {
+            this->__update_min(value, min);
+            this->__update_max(value, max);
         }
     };
 }
