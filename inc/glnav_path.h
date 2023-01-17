@@ -35,12 +35,14 @@ namespace glnav
         {
             this->start = other.start;
             this->end = other.end;
+            return *this;
         }
 
         path& operator+=(const point<T> &rhs)
         {
             this->start += rhs;
             this->end += rhs;
+            return *this;
         }
 
         path operator+(const point<T> &rhs) const

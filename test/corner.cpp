@@ -64,8 +64,8 @@ int main(void)
         TEST_FALSE(test.obstructs(glnav::path<int>(0, 2, 1, 1)));
 
         // Passes through parallel
-        TEST_FALSE(test.obstructs(glnav::path<int>(1, 0, 1, 3)));
-        TEST_FALSE(test.obstructs(glnav::path<int>(-1, 1, 2, 1)));
+        TEST_TRUE(test.obstructs(glnav::path<int>(1, 0, 1, 3)));
+        TEST_TRUE(test.obstructs(glnav::path<int>(-1, 1, 2, 1)));
 
         // Passes through obstructs
         TEST_TRUE(test.obstructs(glnav::path<int>(0, 0, 2, 2)));

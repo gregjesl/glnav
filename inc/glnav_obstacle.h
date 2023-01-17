@@ -12,7 +12,11 @@ namespace glnav
     {
     public:
         obstacle(const std::vector<point<T> > &outline)
-            : __corners(outline)
+            : __corners(outline),
+            __minX(outline.front().x),
+            __minY(outline.front().y),
+            __maxX(outline.front().x),
+            __maxY(outline.front().y)
         {
             if(outline.size() < 3) throw std::invalid_argument("Insufficent points");
             if(point_group<T>(outline).size() < outline.size()) throw std::invalid_argument("Duplicate points");
@@ -30,7 +34,7 @@ namespace glnav
             assert(fabs(angle) < 1.02f * M_2_PI);
             this->__clockwise = angle > 0;
 
-            for(size_t i = 0; i < outline.size(); i++)
+            for(size_t i = 1; i < outline.size(); i++)
             {
                 this->__update_axis(outline.at(i).x, this->__minX, this->__maxX);
                 this->__update_axis(outline.at(i).y, this->__minY, this->__maxY);
@@ -63,7 +67,7 @@ namespace glnav
         virtual bool obstructs(const path<T> &input) const
         {
             // Fast exclude
-            if(!this->could_contain(input)) return false;
+            if(!this->could_overlap(input, true)) return false;
 
             assert(this->__corners.size() > 2);
             if(this->__corners_obstruct(input)) return true;
@@ -78,8 +82,8 @@ namespace glnav
 
         virtual T minX() const { return this->__minX; }
         virtual T maxX() const { return this->__maxX; }
-        virtual T minY() const { return this->__minX; }
-        virtual T maxY() const { return this->__maxX; }
+        virtual T minY() const { return this->__minY; }
+        virtual T maxY() const { return this->__maxY; }
 
     private:
         std::vector<point<T> > __corners;
@@ -89,7 +93,7 @@ namespace glnav
         T __maxX;
         T __maxY;
 
-        bool __corner_obstructs(const path<T> &input, const size_t index)
+        bool __corner_obstructs(const path<T> &input, const size_t index) const
         {
             assert(index < this->__corners.size());
             const point<T> &center = this->__corners.at(index);
@@ -99,27 +103,29 @@ namespace glnav
             return test.obstructs(input);
         }
 
-        bool __corners_obstruct(const path<T> &input)
+        bool __corners_obstruct(const path<T> &input) const
         {
             assert(this->__corners.size() > 2);
             for(size_t i = 0; i < this->__corners.size(); i++)
             {
-                if(this->__corner_obstructs(input, index)) return true;
+                if(this->__corner_obstructs(input, i)) return true;
             }
             return false;
         }
 
-        bool __side_obstructs(const path<T> &input, const size_t index)
+        bool __side_obstructs(const path<T> &input, const size_t index) const
         {
             assert(index < this->__corners.size());
             const path<T> wall(
                 index == 0 ? this->__corners.back() : this->__corners.at(index - 1),
                 this->__corners.at(index)
             );
-            return wall.intersects(input, false);
+            if(input.terminates_within(wall)) return true;
+            if(input.overlaps(wall)) return false;
+            return wall.intersects(input, true);
         }
 
-        bool __sides_obstruct(const path<T> &input)
+        bool __sides_obstruct(const path<T> &input) const
         {
             assert(this->__corners.size() > 2);
             for(size_t i = 0; i < this->__corners.size(); i++)
@@ -131,12 +137,12 @@ namespace glnav
 
         void __update_min(const T input, T &value)
         {
-            if(input < value) input = value;
+            if(input < value) value = input;
         }
 
         void __update_max(const T input, T &value)
         {
-            if(input > value) input = value;
+            if(input > value) value = input;
         }
 
         void __update_axis(const T value, T &min, T &max)

@@ -41,16 +41,58 @@ namespace glnav
 
         bool could_contain(const point<T> &input, const bool include_border) const
         {
-            return include_border ?
+            // Check for the case of a line
+            const bool xline = this->minX() == this->maxX();
+            const bool yline = this->minY() == this->maxY();
+
+            // Most common case: neither are a line
+            if(!xline && !yline)
+            {
+                return include_border ?
                 input.x >= this->minX()
-                && input.x <= this->maxX()
-                && input.y >= this->minY()
-                && input.y <= this->maxY()
-                :
-                input.x > this->minX()
-                && input.x < this->maxX()
-                && input.y > this->minY()
-                && input.y < this->maxY();
+                    && input.x <= this->maxX()
+                    && input.y >= this->minY()
+                    && input.y <= this->maxY()
+                    :
+                    input.x > this->minX()
+                    && input.x < this->maxX()
+                    && input.y > this->minY()
+                    && input.y < this->maxY();
+            }
+
+            if(xline && yline)
+            {
+                
+            }
+            
+            if(xline && !yline)
+            {
+                if(input.x != this->minX()) return false;
+                return include_border ?
+                    input.y >= this->minY()
+                    && input.y <= this->maxY()
+                    :
+                    input.y > this->minY()
+                    && input.y < this->maxY();
+            }
+
+            if(yline)
+            {
+                assert(!xline);
+                if(input.y != this->minY()) return false;
+                return include_border ?
+                    input.x >= this->minX()
+                    && input.x <= this->maxX()
+                    :
+                    input.x > this->minX()
+                    && input.x < this->maxX();
+            }
+
+            // Point
+            assert(this->minX() == this->maxX());
+            assert(this->minY() == this->maxY());
+            return input.x == this->minX()
+                && input.y >= this->minY();
         }
     };
 }
