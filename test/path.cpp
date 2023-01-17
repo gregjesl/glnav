@@ -62,4 +62,32 @@ int main(void)
         const glnav::path<int> path2(test.x3, test.y3, test.x4, test.y4);
         TEST_EQUAL(path1.intersects(path2, test.can_overlap), test.should_overlap);
     }
+
+    // Comparison
+    {
+        TEST_TRUE(
+            glnav::path<int>(0, 0, 1, 1) <
+            glnav::path<int>(0, 0, 2, 2)
+        );
+
+        TEST_TRUE(
+            glnav::path<int>(0, 0, 1, 1) <
+            glnav::path<int>(1, 1, 2, 2)
+        );
+
+        TEST_TRUE(
+            glnav::path<int>(0, 0, 0, 2) <
+            glnav::path<int>(0, 1, 2, 1)
+        );
+
+        TEST_FALSE(
+            glnav::path<int>(0, 0, 0, 2) <
+            glnav::path<int>(0, 0, 0, 2)
+        );
+
+        TEST_TRUE(
+            glnav::path<int>(0, 0, 0, 2) ==
+            glnav::path<int>(0, 2, 0, 0)
+        );
+    }
 }
