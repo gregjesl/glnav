@@ -95,6 +95,27 @@ namespace glnav
                 && input.y >= this->minY();
         }
     };
+
+    template<typename T>
+    class cartesian_area : virtual public cartesian_object<T>
+    {
+    public:
+        cartesian_area(const T x1, const T x2, const T y1, const T y2)
+            : __minX(x1 < x2 ? x1 : x2),
+            __minY(y1 < y2 ? y1 : y2),
+            __maxX(x1 > x2 ? x1 : x2),
+            __maxY(y1 > y2 ? y1 : y2)
+        { }
+        virtual T minX() const { return this->__minX; }
+        virtual T maxX() const { return this->__maxX; }
+        virtual T minY() const { return this->__minY; }
+        virtual T maxY() const { return this->__maxY; }
+    private:
+        const T __minX;
+        const T __minY;
+        const T __maxX;
+        const T __maxY;
+    };
 }
 
 #endif

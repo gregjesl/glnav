@@ -4,11 +4,12 @@
 #include "glnav_cartesian.h"
 #include "glnav_obstacle_interface.h"
 #include "glnav_point.h"
+#include <vector>
 
 namespace glnav
 {
     template<typename T>
-    class obstacle : virtual public obstacle_interface<T>, virtual public cartesian_object<T>
+    class obstacle : virtual public obstacle_interface<T>
     {
     public:
         obstacle(const std::vector<point<T> > &outline)

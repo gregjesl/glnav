@@ -242,6 +242,15 @@ namespace glnav
         }
         #endif
 
+        void merge(const point_group<T> &other)
+        {
+            for(typename point_group::const_iterator it = other.begin(); it != other.end(); ++it)
+            {
+                const fixed_point<T> pt(*it);
+                this->insert(pt);
+            }
+        }
+
         point_group translate(const T deltaX, const T deltaY)
         {
             const point<T> delta(deltaX, deltaY);

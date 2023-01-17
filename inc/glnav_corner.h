@@ -83,6 +83,11 @@ namespace glnav
             result.insert(this->__center);
             return result;
         }
+
+        virtual T minX() const { return this->__center.x; }
+        virtual T maxX() const { return this->__center.x; }
+        virtual T minY() const { return this->__center.y; }
+        virtual T maxY() const { return this->__center.y; }
     private:
         const point<T> __center;
         const point<T> __leg1;
