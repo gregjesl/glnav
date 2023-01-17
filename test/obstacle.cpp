@@ -37,4 +37,8 @@ int main(void)
     // Test along wall
     test_path = glnav::path<int>(0, 2, 2, 2);
     TEST_FALSE(test_obs.obstructs(test_path));
+
+    // Test outside
+    test_path = glnav::path<int>(-1, -1, 3, -1);
+    TEST_FALSE(test_obs.obstructs(test_path));
 }
