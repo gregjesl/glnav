@@ -40,7 +40,7 @@ namespace glnav
 
             // Not found in cache
             const bool result = this->__source->obstructs(input);
-            if(cache)
+            if(use_cache)
                 this->__cache.insert(input, result);
             return result;
         }
