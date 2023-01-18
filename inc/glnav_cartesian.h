@@ -62,7 +62,9 @@ namespace glnav
 
             if(xline && yline)
             {
-                
+                // Is a point
+                if(input.x == this->minX() && input.y == this->minY()) return include_border;
+                return false;
             }
             
             if(xline && !yline)
@@ -100,12 +102,40 @@ namespace glnav
     class cartesian_area : virtual public cartesian_object<T>
     {
     public:
-        cartesian_area(const T x1, const T x2, const T y1, const T y2)
+        cartesian_area()
+            : __minX(0), __minY(0), __maxX(0), __maxY(0)
+        { }
+
+        cartesian_area(const T x1, const T y1, const T x2, const T y2)
             : __minX(x1 < x2 ? x1 : x2),
             __minY(y1 < y2 ? y1 : y2),
             __maxX(x1 > x2 ? x1 : x2),
             __maxY(y1 > y2 ? y1 : y2)
         { }
+        
+        cartesian_area(const cartesian_object<T> &other)
+            : __minx(other.minX()),
+            __minY(other.minY()),
+            __maxX(other.maxX()),
+            __maxY(other.maxY())
+        { 
+            assert(this->minX() <= this->maxX());
+            assert(this->minY() <= this->maxY());
+            assert(other.minX() <= other.maxX());
+            assert(other.minY() <= other.maxY());
+        }
+
+        cartesian_area& operator= (const cartesian_object<T> &other)
+        {
+            this->__minX = other.minX();
+            this->__minY = other.minY();
+            this->__maxX = other.maxX();
+            this->__maxY = other.maxY();
+
+            assert(this->minX() <= this->maxX());
+            assert(this->minY() <= this->maxY());
+        }
+
         virtual T minX() const { return this->__minX; }
         virtual T maxX() const { return this->__maxX; }
         virtual T minY() const { return this->__minY; }
