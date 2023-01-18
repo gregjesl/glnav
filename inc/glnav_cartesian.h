@@ -114,7 +114,7 @@ namespace glnav
         { }
         
         cartesian_area(const cartesian_object<T> &other)
-            : __minx(other.minX()),
+            : __minX(other.minX()),
             __minY(other.minY()),
             __maxX(other.maxX()),
             __maxY(other.maxY())

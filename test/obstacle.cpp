@@ -34,6 +34,14 @@ int main(void)
     test_path = glnav::path<int>(-1, 0, 3, 0);
     TEST_FALSE(test_obs.obstructs(test_path));
 
+    // Test landing on corners
+    test_path = glnav::path<int>(-2, -2, 0, 0);
+    TEST_FALSE(test_obs.obstructs(test_path));
+    test_path = glnav::path<int>(-2, -2, 0, 2);
+    TEST_FALSE(test_obs.obstructs(test_path));
+    test_path = glnav::path<int>(-2, -2, 2, 0);
+    TEST_FALSE(test_obs.obstructs(test_path));
+
     // Test along wall
     test_path = glnav::path<int>(0, 2, 2, 2);
     TEST_FALSE(test_obs.obstructs(test_path));
@@ -41,4 +49,7 @@ int main(void)
     // Test outside
     test_path = glnav::path<int>(-1, -1, 3, -1);
     TEST_FALSE(test_obs.obstructs(test_path));
+
+    // Test corner visibility
+    TEST_EQUAL(test_obs.corners(glnav::point<int>(-2, -2)).size(), 3);
 }

@@ -81,6 +81,19 @@ namespace glnav
             return point_group<T>(this->__corners);
         }
 
+        point_group<T> corners(const point<T> &from) const
+        {
+            point_group<T> result;
+            for(size_t i = 0; i < this->__corners.size(); i++)
+            {
+                const path<T> test(from, this->__corners.at(i));
+                if(!this->obstructs(test)) {
+                    result.insert(this->__corners.at(i));
+                }
+            }
+            return result;
+        }
+
         virtual T minX() const { return this->__minX; }
         virtual T maxX() const { return this->__maxX; }
         virtual T minY() const { return this->__minY; }

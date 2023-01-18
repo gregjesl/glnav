@@ -315,28 +315,27 @@ namespace glnav
 
             // At this point, they must either intersect in the middle of each other
             // or they do not intersect
-            const path translated = other - this->end;
-            const point<T> vec = this->as_vector();
-            const T start_cross = vec.cross(translated.start);
-            const T end_cross = vec.cross(translated.end);
-
-            if(start_cross > 0 && end_cross > 0) return false; // Other is to the right of this
-            if(start_cross < 0 && end_cross < 0) return false; // Other is to the left of this
-
-            // At this point we know this points to somewhere in between the start and end of the other
-            const point<T> other_vec = other.as_vector();
-            const path other_start_to_this_end(other.start, vec);
-            const point<T> ends = other_start_to_this_end.as_vector();
-            if(start_cross < 0)
             {
-                // vec -> | / <- start of path
-                // If the cross product between the path and the vector from the start to the vec end 
-                // is also negative, then there is an intersection
-                return ends.cross(other_vec) > 0;
-            } else {
-                // start of path -> | / <- vec
-                return ends.cross(other_vec) < 0;
+                const path translated = other - this->end;
+                const point<T> vec = this->as_vector();
+                const T start_cross = vec.cross(translated.start);
+                const T end_cross = vec.cross(translated.end);
+
+                if(start_cross > 0 && end_cross > 0) return false; // Other is to the right of this
+                if(start_cross < 0 && end_cross < 0) return false; // Other is to the left of this
             }
+            
+            {
+                const path translated = *this - other.end;
+                const point<T> vec = other.as_vector();
+                const T start_cross = vec.cross(translated.start);
+                const T end_cross = vec.cross(translated.end);
+
+                if(start_cross > 0 && end_cross > 0) return false; // This is to the right of other
+                if(start_cross < 0 && end_cross < 0) return false; // This is to the left of other
+            }
+
+            return true;
         }
     };
 }

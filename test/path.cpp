@@ -18,6 +18,8 @@ struct test_case
 
 test_case test_cases[] = 
 {
+    { -2, -2, 0, 2, 0, 0, 2, 0, false, false }, // Does not intersect
+    { -2, -2, 0, 2, 0, 0, 2, 0, true, false }, // Does not intersect
     { 1, 2, 3, 4, 1, 2, -3, -4, true, false }, // Start overlaps with start
     { 1, 2, 3, 4, 1, 2, -3, -4, false, true }, // Start overlaps with start
     { 1, 2, 3, 4, -5, -6, 1, 2, true, false }, // Start overlaps with end
