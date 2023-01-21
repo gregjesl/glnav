@@ -52,4 +52,10 @@ int main(void)
     TEST_EQUAL(test.neighbors(start).size(), 1);
     TEST_TRUE(test.neighbors(start).at(0).first == end);
     TEST_TRUE(test.neighbors(end).at(0).first == start);
+
+    // Connect networks
+    glnav::network<int> next;
+    next.add(glnav::path<int>(end, other), 1.0);
+    TEST_EQUAL(test.overlap(next).size(), 1);
+    TEST_TRUE(test.overlap(next).at(0) == end);
 }

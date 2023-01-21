@@ -137,6 +137,19 @@ namespace glnav
             return result;
         }
 
+        point_group<T> overlap(const network<T> &other) const
+        {
+            point_group<T> result;
+            typename network_base_t::const_iterator core;
+            for(core = this->begin(); core != this->end(); ++core)
+            {
+                if(other.contains(core->first)) {
+                    result.push_back(core->first);
+                }
+            }
+            return result;
+        }
+
     private:
         void __add(const point<T> &start, const point<T> &end, const double cost)
         {
