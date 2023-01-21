@@ -3,6 +3,7 @@
 
 #include <math.h>
 #include <vector>
+#include <map>
 #include <stdexcept>
 
 namespace glnav
@@ -180,6 +181,36 @@ namespace glnav
             this->reserve(this->size() + other.size());
             this->insert(this->end(), other.begin(), other.end());
         }
+    };
+
+    template<typename T, typename Q>
+    class point_map : public std::map<point<T>, Q>
+    {
+    public:
+        point_map(const Q seed) : std::map<point<T>, Q>(), __seed(seed) { }
+        bool contains(const point<T> &input) const { return this->find(input) != this->end(); }
+        Q get(const point<T> &input)
+        {
+            typename std::map<point<T>, Q>::const_iterator it = this->find(input);
+            return it != this->end() ? it->second : this->__seed;
+        }
+
+        bool set(const point<T> &key, const Q value)
+        {
+            typename std::map<point<T>, Q>::iterator it = this->find(key);
+            if(it != this->end()) {
+                it->second = value;
+            } else {
+                this->insert(std::pair<point<T>, Q>(key, value));
+            }
+            return it != this->end() ? it->second : this->__seed;
+        }
+
+        using std::map<point<T>, Q>::clear;
+        using std::map<point<T>, Q>::empty;
+        using std::map<point<T>, Q>::size;
+    private:
+        const Q __seed;
     };
 }
 
