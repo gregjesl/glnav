@@ -8,5 +8,6 @@
 #include "inc/glnav_obstruction_wrapper.h"
 #include "inc/glnav_network.h"
 #include "inc/glnav_cost_map.h"
+#include "inc/glnav_edge_map.h"
 
 #endif
