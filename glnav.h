@@ -7,5 +7,6 @@
 #include "inc/glnav_obstacle.h"
 #include "inc/glnav_obstruction_wrapper.h"
 #include "inc/glnav_network.h"
+#include "inc/glnav_cost_map.h"
 
 #endif
