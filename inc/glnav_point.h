@@ -2,7 +2,7 @@
 #define GLNAV_POINT_H
 
 #include <math.h>
-#include <set>
+#include <vector>
 #include <stdexcept>
 
 namespace glnav
@@ -152,124 +152,33 @@ namespace glnav
     };
 
     template<typename T>
-    class fixed_point : private point<T>
+    class point_group : public std::vector<point<T> >
     {
     public:
-        fixed_point(const T x, const T y) : point<T>(x, y),
-            __magnitude_squared(point<T>::magnitude_squared()),
-            __magnitude(sqrt(this->__magnitude_squared))
+        point_group() : std::vector<point<T> >() { }
+        point_group(const std::vector<point<T> > &seed)
+            : std::vector<point<T> >(seed)
         { }
 
-        fixed_point(const point<T> &other) : point<T>(other),
-            __magnitude_squared(point<T>::magnitude_squared()),
-            __magnitude(sqrt(this->__magnitude_squared))
-        { }
-
-        fixed_point& operator=(const point<T> &other)
+        point_group& operator=(const std::vector<point<T> > &seed)
         {
-            point<T>::operator=(other);
-            this->__magnitude_squared = point<T>::magnitude_squared();
-            this->__magnitude = point<T>::magnitude();
+            std::vector<point<T> >::operator=(seed);
             return *this;
         }
 
-        const T& x() const { return point<T>::x; }
-        const T& y() const { return point<T>::y; }
-
-        fixed_point operator+(const point<T> &other) const
+        bool contains(const point<T> &key)  const
         {
-            return fixed_point(point<T>::operator+(other));
-        }
-
-        fixed_point operator-(const point<T> &other) const
-        {
-            return fixed_point(point<T>::operator-(other));
-        }
-
-        bool operator==(const fixed_point<T> &other) const
-        {
-            return this->x() == other.x() && this->y() == other.y();
-        }
-
-        bool operator!=(const fixed_point<T> &other) const
-        {
-            return this->x() != other.x() || this->y() != other.y();
-        }
-
-        bool operator<(const fixed_point &other) const
-        {
-            if(this->__magnitude_squared < other.__magnitude_squared) return true;
-            if(this->__magnitude_squared > other.__magnitude_squared) return false;
-            return this->x() > other.x();
-        }
-
-        bool operator>(const fixed_point &other) const
-        {
-            if(this->__magnitude_squared > other.__magnitude_squared) return true;
-            if(this->__magnitude_squared < other.__magnitude_squared) return false;
-            return this->x() < other.x();
-        }
-
-        using point<T>::cross;
-        using point<T>::dot;
-
-        double magnitude() const { return this->__magnitude; }
-
-        using point<T>::is_between;
-    private:
-        T __magnitude_squared;
-        double __magnitude;
-    };
-
-    template<typename T>
-    class point_group : public std::set<fixed_point<T> >
-    {
-    public:
-        point_group() : std::set<fixed_point<T> >() { }
-        point_group(const std::vector<point<T> > &seed)
-            : std::set<fixed_point<T> >()
-        {
-            for(size_t i = 0; i < seed.size(); i++)
+            for(size_t i = 0; i < this->size(); i++)
             {
-                this->insert(seed.at(i));
+                if(this->at(i) == key) return true;
             }
+            return false;
         }
-
-        #if __cplusplus < 202002L
-        bool contains(const fixed_point<T> &key)  const
-        {
-            return this->find(key) != this->end();
-        }
-        #endif
 
         void merge(const point_group<T> &other)
         {
-            for(typename point_group::const_iterator it = other.begin(); it != other.end(); ++it)
-            {
-                const fixed_point<T> pt(*it);
-                this->insert(pt);
-            }
-        }
-
-        point_group translate(const T deltaX, const T deltaY)
-        {
-            const point<T> delta(deltaX, deltaY);
-            point_group result;
-            for(typename point_group::const_iterator it = this->begin(); it != this->end(); ++it)
-            {
-                result.insert((*it) + delta);
-            }
-            return result;
-        }
-
-        operator std::vector<point<T> >()
-        {
-            std::vector<point<T> > result;
-            for(typename point_group::const_iterator it = this->begin(); it != this->end(); ++it)
-            {
-                result.push_back((*it));
-            }
-            return result;
+            this->reserve(this->size() + other.size());
+            this->insert(this->end(), other.begin(), other.end());
         }
     };
 }

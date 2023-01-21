@@ -88,7 +88,7 @@ namespace glnav
             {
                 const path<T> test(from, this->__corners.at(i));
                 if(!this->obstructs(test)) {
-                    result.insert(this->__corners.at(i));
+                    result.push_back(this->__corners.at(i));
                 }
             }
             return result;

@@ -80,7 +80,7 @@ namespace glnav
         virtual point_group<T> corners() const
         {
             point_group<T> result;
-            result.insert(this->__center);
+            result.push_back(this->__center);
             return result;
         }
 

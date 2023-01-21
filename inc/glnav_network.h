@@ -2,94 +2,13 @@
 #define GLNAV_NETWORK_H
 
 #include "glnav_point.h"
+#include "glnav_edge.h"
 #include "glnav_obstacle_interface.h"
 #include <assert.h>
 #include <map>
 
 namespace glnav
 {
-    template<typename T>
-    class edge
-    {
-    public:
-        const fixed_point<T> * lower;
-        const fixed_point<T> * upper;
-
-        edge(const fixed_point<T> * node1, const fixed_point<T> * node2)
-            : lower(node1 < node2 ? node1 : node2),
-            upper(node1 > node2 ? node1 : node2)
-        {
-            assert(node1 != NULL);
-            assert(node2 != NULL);
-            assert(node1 != node2);
-            assert(*node1 != *node2);
-        }
-
-        edge(const edge &other)
-            : lower(other.lower),
-            upper(other.upper)
-        {
-            assert(this->lower != NULL);
-            assert(this->upper != NULL);
-            assert(this->lower < this->upper);
-        }
-
-        edge& operator= (const edge &other)
-        {
-            this->lower = other.lower;
-            this->upper = other.upper;
-            assert(this->lower != NULL);
-            assert(this->upper != NULL);
-            assert(this->lower < this->upper);
-        }
-
-        path<T> as_path() const
-        {
-            return path<T>(
-                this->lower->x(),
-                this->lower->y(),
-                this->upper->x(),
-                this->upper->y()
-            );
-        }
-
-        bool operator== (const edge<T> &other) const
-        {
-            assert(this->lower != NULL);
-            assert(this->upper != NULL);
-            assert(other.lower != NULL);
-            assert(other.upper != NULL);
-            assert(this->lower < this->upper && other.lower < other.upper);
-            return this->lower == other.lower && this->upper == other.upper;
-        }
-
-        bool operator!= (const edge<T> &other) const
-        {
-            assert(this->lower != NULL);
-            assert(this->upper != NULL);
-            assert(other.lower != NULL);
-            assert(other.upper != NULL);
-            assert(this->lower < this->upper && other.lower < other.upper);
-            return this->lower != other.lower || this->upper != other.upper;
-        }
-
-        bool operator< (const edge &other) const
-        {
-            assert(this->lower != NULL);
-            assert(this->upper != NULL);
-            assert(other.lower != NULL);
-            assert(other.upper != NULL);
-            assert(this->lower < this->upper && other.lower < other.upper);
-            if(this->lower < other.lower) return true;
-            if(this->lower > other.lower) return false;
-            assert(this->lower == other.lower);
-            if(this->upper < other.upper) return true;
-            if(this->upper > other.upper) return false;
-            assert(*this == other);
-            return false;
-        }
-    };
-
     template<typename T>
     class network
     {
@@ -105,14 +24,14 @@ namespace glnav
                 it1 != this->__nodes.end();
                 ++it1)
             {
-                const fixed_point<T> * point1 = &(*it1);
+                const point<T> * point1 = &(*it1);
 
                 // TODO: Optimize
                 for(typename point_group<T>::const_iterator it2 = it1;
                     it2 != this->__nodes.end();
                     ++it2)
                 {
-                    const fixed_point<T> * point2 = &(*it2);
+                    const point<T> * point2 = &(*it2);
 
                     // Check for same point
                     if(point1 == point2) continue;
@@ -124,7 +43,6 @@ namespace glnav
                         continue;
                     }
                     
-
                     const path<T> test_path = test.as_path();
 
                     // Check for path
