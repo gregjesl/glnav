@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <stdexcept>
+#include <assert.h>
 
 namespace glnav
 {
@@ -58,7 +59,10 @@ namespace glnav
             const T mag_other = other.magnitude_squared();
             if(mag_this < mag_other) return true;
             if(mag_this > mag_other) return false;
-            return this->x > other.x;
+            if(this->x > other.x) return true;
+            if(this->x < other.x) return false;
+            assert(this->y != other.y);
+            return this->y > other.y;
         }
 
         bool operator>(const point &other) const
@@ -67,7 +71,10 @@ namespace glnav
             const T mag_other = other.magnitude_squared();
             if(mag_this > mag_other) return true;
             if(mag_this < mag_other) return false;
-            return this->x < other.x;
+            if(this->x < other.x) return true;
+            if(this->x > other.x) return false;
+            assert(this->y != other.y);
+            return this->y < other.y;
         }
         
         T dot(const point &other) const
