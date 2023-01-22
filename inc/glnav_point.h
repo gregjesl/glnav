@@ -182,6 +182,19 @@ namespace glnav
             return false;
         }
 
+        void remove(const point<T> &key)
+        {
+            size_t i = 0;
+            while(i < this->size())
+            {
+                if(this->at(i) == key) {
+                    this->erase(this->begin() + i);
+                } else {
+                    i++;
+                }
+            }
+        }
+
         void merge(const point_group<T> &other)
         {
             this->reserve(this->size() + other.size());
