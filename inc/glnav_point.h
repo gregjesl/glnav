@@ -55,6 +55,7 @@ namespace glnav
 
         bool operator<(const point &other) const
         {
+            if(this->operator==(other)) return false;
             const T mag_this = this->magnitude_squared();
             const T mag_other = other.magnitude_squared();
             if(mag_this < mag_other) return true;
