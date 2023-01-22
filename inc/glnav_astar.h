@@ -2,6 +2,7 @@
 #define GLNAV_ASTAR_H
 
 #include "glnav_network.h"
+#include <algorithm>
 
 namespace glnav
 {
@@ -11,6 +12,7 @@ namespace glnav
     public:
         astar(network<T> &net, const point<T> &from, const point<T> &to)
             : __net(net),
+            __path(point<T>(0, 0)),
             __from(from),
             __to(to),
             __solved(false)
@@ -59,6 +61,7 @@ namespace glnav
                 const point<T> &neighbor = neighbors.at(i).first;
                 if(tentative < this->__gscore.cost(neighbor))
                 {
+                    this->__path.set(neighbor, current);
                     this->__gscore.update(neighbor, tentative);
                     this->__fscore.update(neighbor, tentative + this->__heuristic(neighbor));
                     if(!this->__open_set.contains(neighbor)) this->__open_set.push_back(neighbor);
@@ -74,25 +77,16 @@ namespace glnav
             if(!this->__solved) return result;
             assert(this->__net.contains(this->__from));
             assert(this->__net.contains(this->__to));
-            if(this->__fscore.cost(this->__from) == std::numeric_limits<double>::infinity()) return result;
-            result.push_back(this->__from);
-            while(result.back() != this->__to)
+            if(!this->__path.contains(this->__to)) return result;
+            point<T> current = this->__to;
+            while(current != this->__from)
             {
-                const std::vector<std::pair<point<T>, double> > neighbors = this->__net.neighbors(result.back());
-                assert(neighbors.size() > 0);
-                point<T> next = neighbors.at(0).first;
-                double cost = this->__fscore.cost(next);
-                for(size_t i = 1; i < neighbors.size(); i++)
-                {
-                    if(this->__fscore.cost(neighbors.at(i).first) < cost) {
-                        next = neighbors.at(i).first;
-                        cost = this->__fscore.cost(next);
-                    }
-                }
-                if(result.contains(next)) throw std::runtime_error("Loop detected");
-                result.push_back(next);
-                assert(result.size() < this->__net.size());
+                result.push_back(current);
+                const point<T> next = this->__path.get(current);
+                current = next;
             }
+            result.push_back(this->__from);
+            std::reverse(result.begin(), result.end());
             return result;
         }
 
@@ -119,6 +113,7 @@ namespace glnav
         cost_map<T> __gscore;
         cost_map<T> __fscore;
         point_group<T> __open_set;
+        point_map<T, point<T> > __path;
         point<T> __from;
         point<T> __to;
         bool __solved;

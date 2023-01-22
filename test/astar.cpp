@@ -35,4 +35,7 @@ int main(void)
     const glnav::point_group<double> solution = test.route();
     TEST_EQUAL(solution.size(), 4);
     TEST_TRUE(solution.at(0) == start);
+    TEST_TRUE(solution.at(1) == point2);
+    TEST_TRUE(solution.at(2) == point4);
+    TEST_TRUE(solution.at(3) == finish);
 }
