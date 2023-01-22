@@ -66,6 +66,46 @@ namespace glnav
             : network_base_t(),
             __version(0)
         { }
+
+        network(const network &other)
+            : network_base_t()
+        {
+            this->operator=(other);
+        }
+
+        network& operator=(const network &other)
+        {
+            this->clear();
+
+            // Populate all the base points
+            typename network_base_t::const_iterator it;
+            for(it = other.begin(); it != other.end(); ++it)
+            {
+                this->insert(
+                    std::pair<point<T>, neighbor_map<T> >(it->first, neighbor_map<T>())
+                );
+            }
+
+            // Copy the paths
+            for(it = other.begin(); it != other.end(); ++it)
+            {
+                std::vector<std::pair<point<T>, double> > neighbors = it->second.neighbors();
+                for(size_t i = 0; i < neighbors.size(); i++)
+                {
+                    typename network_base_t::iterator internal = this->find(neighbors.at(i).first);
+                    assert(internal != this->end());
+                    internal->second.update(&internal->first, neighbors.at(i).second);
+                }
+            }
+
+            // Copy the version
+            this->__version = other.version();
+
+            // Test
+            assert(this->size() == other.size());
+
+            return *this;
+        }
         
         void add(const path<T> &seed, const double cost)
         {

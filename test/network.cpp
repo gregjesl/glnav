@@ -63,4 +63,9 @@ int main(void)
     next.add(glnav::path<int>(end, other), 1.0);
     TEST_EQUAL(test.overlap(next).size(), 1);
     TEST_TRUE(test.overlap(next).at(0) == end);
+
+    // Copy network
+    glnav::network<int> construct(test);
+    TEST_TRUE(construct.contains(start));
+    TEST_TRUE(construct.contains(end));
 }
