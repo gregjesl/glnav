@@ -86,6 +86,11 @@ namespace glnav
             return result;
         }
 
+        bool contains(const point<T> &input) const
+        {
+            return this->corners().contains(input);
+        }
+
         size_t size() const { return this->__obstacles.size(); }
 
     private:
