@@ -13,7 +13,7 @@ namespace glnav
     public:
         dijkstra(network<T> &net, const point<T> &from, const point<T> &to)
             : __net(net),
-            __map(net.seed_cost_map()),
+            __map(net),
             __from(from),
             __to(to),
             __solved(false)
@@ -85,7 +85,7 @@ namespace glnav
         {
             if(!this->__net.contains(this->__from)) throw std::runtime_error("Network does not contain origin");
             if(!this->__net.contains(this->__to)) throw std::runtime_error("Network does not contain destination");
-            this->__map = this->__net.seed_cost_map();
+            this->__map = cost_map<T>(this->__net);
             this->__map.update(this->__to, 0.0);
             this->__solved = false;
             this->__version = this->__net.version();

@@ -3,7 +3,6 @@
 
 #include "glnav_point.h"
 #include "glnav_edge.h"
-#include "glnav_cost_map.h"
 #include <assert.h>
 #include <map>
 #include <inttypes.h>
@@ -98,8 +97,8 @@ namespace glnav
                 }
             }
 
-            // Copy the version
-            this->__version = other.version();
+            // Iterate the version
+            this->__version++;
 
             // Test
             assert(this->size() == other.size());
@@ -159,27 +158,15 @@ namespace glnav
             return start_it->second.neighbors();
         }
 
-        template<typename W>
-        std::map<point<T> , W> node_map(const W seed) const
+        std::map<point<T>, double> node_map(const double seed) const
         {
-            std::map<point<T> , W> result;
+            std::map<point<T> , double> result;
             typename network_base_t::const_iterator it;
             for(it = this->begin(); it != this->end(); it++)
             {
                 result.insert(
-                    std::pair<point<T>, W>(it->first, seed)
+                    std::pair<point<T>, double>(it->first, seed)
                 );
-            }
-            return result;
-        }
-
-        cost_map<T> seed_cost_map() const
-        {
-            cost_map<T> result;
-            typename network_base_t::const_iterator it;
-            for(it = this->begin(); it != this->end(); it++)
-            {
-                result.seed(it->first);
             }
             return result;
         }

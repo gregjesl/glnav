@@ -34,9 +34,9 @@ int main(void)
     TEST_TRUE(test.cost(start, end) < 4.0);
 
     // Node map
-    TEST_EQUAL(test.node_map<double>(1.0).size(), 2);
-    TEST_TRUE(test.node_map<double>(1.0).begin()->first == start);
-    TEST_TRUE(test.node_map<double>(1.0).begin()->second == 1.0);
+    TEST_EQUAL(test.node_map(1.0).size(), 2);
+    TEST_TRUE(test.node_map(1.0).begin()->first == start);
+    TEST_TRUE(test.node_map(1.0).begin()->second == 1.0);
 
     // Add a third
     const glnav::point<int> other(6, 5);

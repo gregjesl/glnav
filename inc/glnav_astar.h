@@ -94,9 +94,9 @@ namespace glnav
         {
             if(!this->__net.contains(this->__from)) throw std::runtime_error("Network does not contain origin");
             if(!this->__net.contains(this->__to)) throw std::runtime_error("Network does not contain destination");
-            this->__gscore = this->__net.seed_cost_map();
+            this->__gscore = cost_map<T>(this->__net);
             this->__gscore.update(this->__from, 0.0);
-            this->__fscore = this->__net.seed_cost_map();
+            this->__fscore = cost_map<T>(this->__net);
             this->__fscore.update(this->__from, this->__heuristic(this->__from));
             this->__open_set.clear();
             this->__open_set.push_back(this->__from);

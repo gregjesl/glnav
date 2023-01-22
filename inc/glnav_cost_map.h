@@ -2,6 +2,7 @@
 #define GLNAV_COST_MAP_H
 
 #include "glnav_point.h"
+#include "glnav_network.h"
 #include <map>
 
 namespace glnav
@@ -12,8 +13,20 @@ namespace glnav
     public:
         cost_map() 
             : std::map<point<T> , double>(),
-            __lowest_cost(this->end())
+            __seed(0)
         { }
+
+        cost_map(const network<T> &net)
+            : std::map<point<T> , double>(net.node_map(std::numeric_limits<double>::infinity())),
+            __seed(net.version())
+        { }
+
+        cost_map& operator=(const cost_map &other)
+        {
+            std::map<point<T> , double>::operator=(other);
+            this->__seed = other.__seed;
+            return *this;
+        }
         
         double cost(const point<T> &input) const
         {
@@ -31,8 +44,6 @@ namespace glnav
                 std::pair<point<T>, double>
                     (input, std::numeric_limits<double>::infinity())
                 );
-            if(this->__lowest_cost == this->end())
-                this->__lowest_cost = this->begin();
         }
 
         void update(const point<T> &input, const double cost)
@@ -40,55 +51,27 @@ namespace glnav
             typename std::map<point<T> , double>::iterator it = this->find(input);
             if(it == this->end())
             {
-                const std::pair<
-                    typename std::map<point<T>, double>::const_iterator,
-                    bool
-                > result = this->insert(
+                this->insert(
                     std::pair<point<T>, double>
                         (input, cost)
                 );
-                if(cost < this->__lowest_cost->second && result.second) {
-                    this->__lowest_cost = result.first;
-                }
             }
             else
             {
                 it->second = cost;
-                if(cost < this->__lowest_cost->second)
-                {
-                    this->__lowest_cost = it;
-                }
             }
         }
 
-        std::vector<const point<T> *> pointers() const
+        void update(const cost_map<T> &from)
         {
-            std::vector<const point<T> *> result;
             typename std::map<point<T> , double>::const_iterator it;
-            for(it = this->begin(); it != this->end(); ++it)
+            for(it = from.begin(); it != from.end(); ++it)
             {
-                result.push_back(&(it->first));
+                this->update(it->first, it->second);
             }
-            return result;
         }
-
-        double lowest_cost() const 
-        { 
-            if(this->__lowest_cost == this->end())
-                return std::numeric_limits<double>::infinity();
-            return this->__lowest_cost->second;
-        }
-
-        const point<T> * lowest_cost_point() const 
-        { 
-            return this->__lowest_cost == this->end() ? 
-                nullptr
-                :
-                &this->__lowest_cost->first;
-        }
-
     private:
-        typename std::map<point<T> , double>::const_iterator __lowest_cost;
+        version_t __seed;
     };
 }
 
