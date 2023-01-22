@@ -7,7 +7,7 @@
 namespace glnav
 {
     template<typename T>
-    class cost_map : private std::map<point<T> , double>
+    class cost_map : public std::map<point<T> , double>
     {
     public:
         cost_map() 

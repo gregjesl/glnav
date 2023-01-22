@@ -61,7 +61,6 @@ namespace glnav
             if(mag_this > mag_other) return false;
             if(this->x > other.x) return true;
             if(this->x < other.x) return false;
-            assert(this->y != other.y);
             return this->y > other.y;
         }
 
