@@ -6,6 +6,7 @@
 #include "glnav_cost_map.h"
 #include <assert.h>
 #include <map>
+#include <inttypes.h>
 
 namespace glnav
 {
@@ -61,17 +62,21 @@ namespace glnav
     {
     public:
         network()
-            : network_base_t()
+            : network_base_t(),
+            __version(0)
         { }
         
         void add(const path<T> &seed, const double cost)
         {
+            if(this->__version == UINT64_MAX) throw std::overflow_error("Version overflow");
             this->__add(seed.start, seed.end, cost);
             this->__add(seed.end, seed.start, cost);
+            this->__version++;
         }
 
         void remove(const point<T> &node)
         {
+            if(this->__version == UINT64_MAX) throw std::overflow_error("Version overflow");
             typename network_base_t::iterator it = this->find(node);
             if(it == this->end()) return;
             const point<T> * end_ptr = &it->first;
@@ -83,6 +88,7 @@ namespace glnav
                 it->second.erase(end_ptr);
             }
             this->erase(node);
+            this->__version++;
         }
 
         bool contains(const point<T> &node) const
@@ -150,6 +156,8 @@ namespace glnav
             return result;
         }
 
+        uint64_t version() const { return this->__version; }
+
     private:
         void __add(const point<T> &start, const point<T> &end, const double cost)
         {
@@ -190,6 +198,8 @@ namespace glnav
             assert(end_ptr != nullptr);
             start_it->second.update(end_ptr, cost);
         }
+
+        uint64_t __version;
     };
 
     #undef network_base_t
