@@ -18,8 +18,6 @@ namespace glnav
             __to(to),
             __solved(false)
         {
-            if(!net.contains(from)) throw std::invalid_argument("Network does not contain origin");
-            if(!net.contains(to)) throw std::invalid_argument("Network does not contain destination");
             this->reset();
         }
 
@@ -28,6 +26,9 @@ namespace glnav
 
         size_t iterate()
         {
+            // Check for version update
+            if(this->__net.version() != this->__version) this->reset();
+
             size_t num_changes = 0;
             typename cost_map<T>::iterator it;
             for(it = this->__map.begin(); it != this->__map.end(); ++it)
@@ -82,9 +83,12 @@ namespace glnav
 
         void reset()
         {
+            if(!this->__net.contains(this->__from)) throw std::runtime_error("Network does not contain origin");
+            if(!this->__net.contains(this->__to)) throw std::runtime_error("Network does not contain destination");
             this->__map = this->__net.seed_cost_map();
             this->__map.update(this->__to, 0.0);
             this->__solved = false;
+            this->__version = this->__net.version();
         }
     private:
         network<T> &__net;
@@ -92,6 +96,7 @@ namespace glnav
         point<T> __from;
         point<T> __to;
         bool __solved;
+        version_t __version;
     };
 }
 

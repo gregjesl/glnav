@@ -56,6 +56,7 @@ namespace glnav
     };
 
     #define network_base_t std::map<const point<T>, neighbor_map<T> >
+    typedef uint64_t version_t;
 
     template<typename T>
     class network : private network_base_t
@@ -156,7 +157,7 @@ namespace glnav
             return result;
         }
 
-        uint64_t version() const { return this->__version; }
+        version_t version() const { return this->__version; }
 
     private:
         void __add(const point<T> &start, const point<T> &end, const double cost)
@@ -199,7 +200,7 @@ namespace glnav
             start_it->second.update(end_ptr, cost);
         }
 
-        uint64_t __version;
+        version_t __version;
     };
 
     #undef network_base_t
