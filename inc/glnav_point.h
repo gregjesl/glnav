@@ -207,12 +207,19 @@ namespace glnav
     class point_map : public std::map<point<T>, Q>
     {
     public:
-        point_map(const Q seed) : std::map<point<T>, Q>(), __seed(seed) { }
+        point_map() : std::map<point<T>, Q>() { }
         bool contains(const point<T> &input) const { return this->find(input) != this->end(); }
-        Q get(const point<T> &input) const
+
+        const Q * get(const point<T> &key) const
         {
-            typename std::map<point<T>, Q>::const_iterator it = this->find(input);
-            return it != this->end() ? it->second : this->__seed;
+            typename std::map<point<T>, Q>::const_iterator it = this->find(key);
+            return it != this->end() ? &it->second : nullptr;
+        }
+
+        Q * edit(const point<T> &key)
+        {
+            typename std::map<point<T>, Q>::iterator it = this->find(key);
+            return it != this->end() ? &it->second : nullptr;
         }
 
         bool set(const point<T> &key, const Q value)
@@ -223,14 +230,12 @@ namespace glnav
             } else {
                 this->insert(std::pair<point<T>, Q>(key, value));
             }
-            return it != this->end();
+            return it == this->end(); // Return true if new
         }
 
         using std::map<point<T>, Q>::clear;
         using std::map<point<T>, Q>::empty;
         using std::map<point<T>, Q>::size;
-    private:
-        const Q __seed;
     };
 }
 

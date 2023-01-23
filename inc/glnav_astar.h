@@ -12,7 +12,7 @@ namespace glnav
     public:
         astar(network<T> &net, const point<T> &from, const point<T> &to)
             : __net(net),
-            __path(point<T>(0, 0)),
+            __path(),
             __from(from),
             __to(to),
             __solved(false)
@@ -82,8 +82,9 @@ namespace glnav
             while(current != this->__from)
             {
                 result.push_back(current);
-                const point<T> next = this->__path.get(current);
-                current = next;
+                const point<T> * next = this->__path.get(current);
+                assert(next != nullptr);
+                current = *next; 
             }
             result.push_back(this->__from);
             std::reverse(result.begin(), result.end());
