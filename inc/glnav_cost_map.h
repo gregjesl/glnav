@@ -16,15 +16,13 @@ namespace glnav
         cost_map() 
             : std::map<point<T> , double>(),
             version_controlled(),
-            __net(nullptr),
-            __seed(0)
+            __net(nullptr)
         { }
 
         cost_map(const network<T> &net)
             : std::map<point<T> , double>(net.node_map(std::numeric_limits<double>::infinity())),
             version_controlled(net),
-            __net(&net),
-            __seed(net.version())
+            __net(&net)
         { }
 
         using std::map<point<T> , double>::size;
@@ -34,7 +32,7 @@ namespace glnav
         {
             // Perform version check
             if(this->__net != nullptr && !this->versions_syncronized(*this->__net))
-                throw version_mismatch(this->__seed, this->__net->version());
+                throw version_mismatch(*this, *this->__net);
 
             const typename std::map<point<T> , double>::const_iterator it = this->find(input);
             if(it != this->end())
@@ -49,8 +47,8 @@ namespace glnav
             // Perform version check
             if(this->__net != nullptr)
             {
-                if(this->__seed != this->__net->version())
-                    throw version_mismatch(this->__seed, this->__net->version());
+                if(this->__net != nullptr && !this->versions_syncronized(*this->__net))
+                    throw version_mismatch(*this, *this->__net);
                 
                 if(!this->__net->contains(input))
                     throw std::out_of_range("Point is not in network");
@@ -102,7 +100,7 @@ namespace glnav
             if(this->__net == nullptr)
                 throw std::runtime_error("Not attached to network");
             
-            return this->__seed == this->__net->version();
+            return !this->versions_syncronized(*this->__net);
         }
 
         size_t iterate()
@@ -110,8 +108,8 @@ namespace glnav
             if(this->__net == nullptr)
                 throw std::runtime_error("Not attached to network");
 
-            if(this->__net->version() != this->__seed)
-                throw version_mismatch(this->__seed, this->__net->version());
+            if(this->__net != nullptr && !this->versions_syncronized(*this->__net))
+                    throw version_mismatch(*this, *this->__net);
 
             assert(this->size() == this->__net->size());
             
@@ -149,7 +147,6 @@ namespace glnav
         version_t version() const { return this->__seed; }
     private:
         const glnav::network<T> * __net;
-        version_t __seed;
     };
 }
 
