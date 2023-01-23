@@ -8,18 +8,18 @@ namespace glnav
 {
     typedef uint64_t version_t;
 
-    class version_controlled
+    class version_dependent
     {
     public:
-        version_controlled()
+        version_dependent()
             : __version(0)
         { }
 
-        version_controlled(const version_t &seed)
+        version_dependent(const version_t seed)
             : __version(seed)
         { }
 
-        version_controlled(const version_controlled &other)
+        version_dependent(const version_dependent &other)
             : __version(other.__version)
         { }
 
@@ -29,13 +29,31 @@ namespace glnav
         }
 
         version_t version() const { return this->__version; }
-        void update_version() { this->__version++; }
-        bool versions_syncronized(const version_controlled &other) const
+
+        bool versions_synchronized(const version_dependent &other) const
         { 
             return this->__version == other.__version;
         }
     private:
         version_t __version;
+    };
+
+    class version_controlled : public version_dependent
+    {
+    public:
+        version_controlled()
+            : version_dependent()
+        { }
+
+        version_controlled(const version_t &seed)
+            : version_dependent(seed)
+        { }
+
+        version_controlled(const version_dependent &other)
+            : version_dependent(other)
+        { }
+
+        void update_version() { this->set_version(this->version() + 1); }
     };
 
     class version_mismatch : public std::runtime_error

@@ -10,18 +10,18 @@ namespace glnav
 {
     template<typename T>
     class cost_map : private point_map<T, double>,
-        public version_controlled
+        public version_dependent
     {
     public:
         cost_map() 
             : point_map<T, double>(),
-            version_controlled(),
+            version_dependent(),
             __net(nullptr)
         { }
 
         cost_map(const network<T> &net)
             : point_map<T, double>(net.node_map(std::numeric_limits<double>::infinity())),
-            version_controlled(net),
+            version_dependent(net),
             __net(&net)
         { }
 
@@ -31,7 +31,7 @@ namespace glnav
         double cost(const point<T> &input) const
         {
             // Perform version check
-            if(this->__net != nullptr && !this->versions_syncronized(*this->__net))
+            if(this->__net != nullptr && !this->versions_synchronized(*this->__net))
                 throw version_mismatch(*this, *this->__net);
             assert(this->contains(input));
             return this->force_get(input);
@@ -42,7 +42,7 @@ namespace glnav
             // Perform version check
             if(this->__net != nullptr)
             {
-                if(this->__net != nullptr && !this->versions_syncronized(*this->__net))
+                if(this->__net != nullptr && !this->versions_synchronized(*this->__net))
                     throw version_mismatch(*this, *this->__net);
                 
                 if(!this->__net->contains(input))
@@ -92,7 +92,7 @@ namespace glnav
             if(this->__net == nullptr)
                 throw std::runtime_error("Not attached to network");
 
-            if(this->__net != nullptr && !this->versions_syncronized(*this->__net))
+            if(this->__net != nullptr && !this->versions_synchronized(*this->__net))
                     throw version_mismatch(*this, *this->__net);
 
             assert(this->size() == this->__net->size());
