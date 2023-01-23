@@ -13,64 +13,107 @@ namespace glnav
     public:
         cost_map() 
             : std::map<point<T> , double>(),
+            __net(nullptr),
             __seed(0)
         { }
 
         cost_map(const network<T> &net)
             : std::map<point<T> , double>(net.node_map(std::numeric_limits<double>::infinity())),
+            __net(&net),
             __seed(net.version())
         { }
 
         cost_map& operator=(const cost_map &other)
         {
             std::map<point<T> , double>::operator=(other);
+            this->__net = other.__net;
             this->__seed = other.__seed;
             return *this;
         }
         
         double cost(const point<T> &input) const
         {
-            typename std::map<point<T> , double>::const_iterator it = this->find(input);
+            // Perform version check
+            if(this->__net != nullptr && this->__seed != this->__net->version())
+                throw version_mismatch(this->__seed, this->__net->version());
+
+            const typename std::map<point<T> , double>::const_iterator it = this->find(input);
             if(it != this->end())
             {
                 return it->second;
             }
-            return std::numeric_limits<double>::infinity();
+            throw std::out_of_range("Point not found");
         }
 
-        void seed(const point<T> &input)
+        void set(const point<T> &input, const double value)
         {
-            this->insert(
-                std::pair<point<T>, double>
-                    (input, std::numeric_limits<double>::infinity())
-                );
-        }
+            // Perform version check
+            if(this->__net != nullptr && this->__seed != this->__net->version())
+                throw version_mismatch(this->__seed, this->__net->version());
 
-        void update(const point<T> &input, const double cost)
-        {
-            typename std::map<point<T> , double>::iterator it = this->find(input);
-            if(it == this->end())
+            // Verify the point is contained
+            assert(this->__net == nullptr || this->size() == this->__net->size());
+            assert(this->__net == nullptr || this->__net->contains(input));
+
+            const typename std::map<point<T> , double>::iterator it = this->find(input);
+            if(it != this->end())
+            {
+                it->second = value;
+            }
+            else if(this->__net != nullptr)
+            {
+                assert(!this->__net->contains(input));
+                throw std::out_of_range("Point is not in network");
+            } 
+            else 
             {
                 this->insert(
                     std::pair<point<T>, double>
-                        (input, cost)
+                        (input, value)
                 );
-            }
-            else
-            {
-                it->second = cost;
             }
         }
 
-        void update(const cost_map<T> &from)
+        const network<T> network() const { return this->__net; }
+        bool is_attached() const { return this->__net != nullptr; }
+        bool is_syncronized() const
         {
-            typename std::map<point<T> , double>::const_iterator it;
-            for(it = from.begin(); it != from.end(); ++it)
+            if(this->__net == nullptr)
+                throw std::runtime_error("Not attached to network");
+            
+            return this->__seed == this->__net->version();
+        }
+
+        size_t iterate()
+        {
+            if(this->__net == nullptr)
+                throw std::runtime_error("Not attached to network");
+
+            if(this->__net->version() != this->__seed)
+                throw version_mismatch(this->__seed, this->__net->version());
+
+            assert(this->size() == this->__net->size());
+            
+            size_t num_changes = 0;
+            const typename std::map<point<T> , double>::const_iterator it;
+            for(it = this->begin(); it != this->end(); ++it)
             {
-                this->update(it->first, it->second);
+                std::vector<std::pair<point<T>, double> > neighbors = this->__net->neighbors(it->first);
+                for(size_t i = 0; i < neighbors.size(); i++)
+                {
+                    assert(this->find(neighbors.at(i).first) != this->end());
+                    const double test_cost = it->second + neighbors.at(i).second;
+                    if(test_cost < this->cost(neighbors.at(i).first))
+                    {
+                        this->set(neighbors.at(i).first, test_cost);
+                        num_changes++;
+                    }
+                }
             }
+            return num_changes;
         }
     private:
+        const glnav::network<T> * __net;
         version_t __seed;
     };
 }

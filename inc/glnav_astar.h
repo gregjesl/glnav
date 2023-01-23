@@ -62,8 +62,8 @@ namespace glnav
                 if(tentative < this->__gscore.cost(neighbor))
                 {
                     this->__path.set(neighbor, current);
-                    this->__gscore.update(neighbor, tentative);
-                    this->__fscore.update(neighbor, tentative + this->__heuristic(neighbor));
+                    this->__gscore.set(neighbor, tentative);
+                    this->__fscore.set(neighbor, tentative + this->__heuristic(neighbor));
                     if(!this->__open_set.contains(neighbor)) this->__open_set.push_back(neighbor);
                 }
             }
@@ -95,9 +95,9 @@ namespace glnav
             if(!this->__net.contains(this->__from)) throw std::runtime_error("Network does not contain origin");
             if(!this->__net.contains(this->__to)) throw std::runtime_error("Network does not contain destination");
             this->__gscore = cost_map<T>(this->__net);
-            this->__gscore.update(this->__from, 0.0);
+            this->__gscore.set(this->__from, 0.0);
             this->__fscore = cost_map<T>(this->__net);
-            this->__fscore.update(this->__from, this->__heuristic(this->__from));
+            this->__fscore.set(this->__from, this->__heuristic(this->__from));
             this->__open_set.clear();
             this->__open_set.push_back(this->__from);
             this->__solved = false;

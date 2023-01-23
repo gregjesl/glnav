@@ -57,6 +57,18 @@ namespace glnav
     #define network_base_t std::map<const point<T>, neighbor_map<T> >
     typedef uint64_t version_t;
 
+    class version_mismatch : public std::runtime_error
+    {
+    public:
+        version_mismatch(const version_t expected, const version_t actual) 
+            : std::runtime_error("Version mismatch"),
+            expected(expected),
+            actual(actual)
+        { }
+        const version_t expected;
+        const version_t actual;
+    };
+
     template<typename T>
     class network : private network_base_t
     {
