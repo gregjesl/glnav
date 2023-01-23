@@ -107,6 +107,18 @@ namespace glnav
             }
             return num_changes;
         }
+
+        std::vector<point<T> > overlap(const glnav::network<T> &net) const
+        {
+            std::vector<point<T> > result;
+            typename std::map<point<T> , double>::const_iterator it;
+            for(it = this->begin(); it != this->end(); ++it)
+            {
+                if(net.contains(it->first))
+                    result.push_back(it->first);
+            }
+            return result;
+        }
     private:
         const glnav::network<T> * __net;
         version_t __seed;
