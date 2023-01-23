@@ -203,17 +203,40 @@ namespace glnav
         }
     };
 
+    template<typename T>
+    class unknown_point_exception : public std::out_of_range
+    {
+    public:
+        unknown_point_exception(const point<T> &point)
+            : std::out_of_range("Point not found"),
+            unknown_point(point)
+        { }
+
+        point<T> unknown_point;
+    };
+
     template<typename T, typename Q>
     class point_map : public std::map<point<T>, Q>
     {
     public:
         point_map() : std::map<point<T>, Q>() { }
+        point_map(const std::map<point<T>, Q> &other)
+            : std::map<point<T>, Q>(other)
+        { }
+
         bool contains(const point<T> &input) const { return this->find(input) != this->end(); }
 
         const Q * get(const point<T> &key) const
         {
             typename std::map<point<T>, Q>::const_iterator it = this->find(key);
             return it != this->end() ? &it->second : nullptr;
+        }
+
+        const Q force_get(const point<T> &key) const
+        {
+            typename std::map<point<T>, Q>::const_iterator it = this->find(key);
+            if(it == this->end()) throw unknown_point_exception<T>(key);
+            return it->second;
         }
 
         Q * edit(const point<T> &key)
@@ -232,10 +255,6 @@ namespace glnav
             }
             return it == this->end(); // Return true if new
         }
-
-        using std::map<point<T>, Q>::clear;
-        using std::map<point<T>, Q>::empty;
-        using std::map<point<T>, Q>::size;
     };
 }
 

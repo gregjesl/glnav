@@ -9,40 +9,35 @@
 namespace glnav
 {
     template<typename T>
-    class cost_map : private std::map<point<T> , double>,
+    class cost_map : private point_map<T, double>,
         public version_controlled
     {
     public:
         cost_map() 
-            : std::map<point<T> , double>(),
+            : point_map<T, double>(),
             version_controlled(),
             __net(nullptr)
         { }
 
         cost_map(const network<T> &net)
-            : std::map<point<T> , double>(net.node_map(std::numeric_limits<double>::infinity())),
+            : point_map<T, double>(net.node_map(std::numeric_limits<double>::infinity())),
             version_controlled(net),
             __net(&net)
         { }
 
-        using std::map<point<T> , double>::size;
-        using std::map<point<T> , double>::empty;
+        using point_map<T, double>::size;
+        using point_map<T, double>::empty;
         
         double cost(const point<T> &input) const
         {
             // Perform version check
             if(this->__net != nullptr && !this->versions_syncronized(*this->__net))
                 throw version_mismatch(*this, *this->__net);
-
-            const typename std::map<point<T> , double>::const_iterator it = this->find(input);
-            if(it != this->end())
-            {
-                return it->second;
-            }
-            throw std::out_of_range("Point not found");
+            assert(this->contains(input));
+            return this->force_get(input);
         }
 
-        void set(const point<T> &input, const double value)
+        bool set(const point<T> &input, const double value)
         {
             // Perform version check
             if(this->__net != nullptr)
@@ -51,21 +46,10 @@ namespace glnav
                     throw version_mismatch(*this, *this->__net);
                 
                 if(!this->__net->contains(input))
-                    throw std::out_of_range("Point is not in network");
+                    throw unknown_point_exception<T>(input);
             }
 
-            const typename std::map<point<T> , double>::iterator it = this->find(input);
-            if(it != this->end())
-            {
-                it->second = value;
-            }
-            else 
-            {
-                this->insert(
-                    std::pair<point<T>, double>
-                        (input, value)
-                );
-            }
+            return point_map<T, double>::set(input, value); // Returns true if new
         }
 
         void attach(const glnav::network<T> &net)
