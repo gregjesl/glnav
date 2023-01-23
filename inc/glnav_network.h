@@ -3,6 +3,7 @@
 
 #include "glnav_point.h"
 #include "glnav_edge.h"
+#include "glnav_version_control.h"
 #include <assert.h>
 #include <map>
 #include <inttypes.h>
@@ -57,29 +58,19 @@ namespace glnav
     #define network_base_t std::map<const point<T>, neighbor_map<T> >
     typedef uint64_t version_t;
 
-    class version_mismatch : public std::runtime_error
-    {
-    public:
-        version_mismatch(const version_t expected, const version_t actual) 
-            : std::runtime_error("Version mismatch"),
-            expected(expected),
-            actual(actual)
-        { }
-        const version_t expected;
-        const version_t actual;
-    };
-
     template<typename T>
-    class network : private network_base_t
+    class network : private network_base_t,
+        public version_controlled
     {
     public:
         network()
             : network_base_t(),
-            __version(0)
+            version_controlled()
         { }
 
         network(const network &other)
-            : network_base_t()
+            : network_base_t(),
+            version_controlled()
         {
             this->operator=(other);
         }
@@ -110,7 +101,7 @@ namespace glnav
             }
 
             // Iterate the version
-            this->__version++;
+            this->update_version();
 
             // Test
             assert(this->size() == other.size());
@@ -120,15 +111,13 @@ namespace glnav
         
         void add(const path<T> &seed, const double cost)
         {
-            if(this->__version == UINT64_MAX) throw std::overflow_error("Version overflow");
             this->__add(seed.start, seed.end, cost);
             this->__add(seed.end, seed.start, cost);
-            this->__version++;
+            this->update_version();
         }
 
         void remove(const point<T> &node)
         {
-            if(this->__version == UINT64_MAX) throw std::overflow_error("Version overflow");
             typename network_base_t::iterator it = this->find(node);
             if(it == this->end()) return;
             const point<T> * end_ptr = &it->first;
@@ -140,7 +129,7 @@ namespace glnav
                 it->second.erase(end_ptr);
             }
             this->erase(node);
-            this->__version++;
+            this->update_version();
         }
 
         bool contains(const point<T> &node) const
@@ -196,8 +185,6 @@ namespace glnav
             return result;
         }
 
-        version_t version() const { return this->__version; }
-
     private:
         void __add(const point<T> &start, const point<T> &end, const double cost)
         {
@@ -238,8 +225,6 @@ namespace glnav
             assert(end_ptr != nullptr);
             start_it->second.update(end_ptr, cost);
         }
-
-        version_t __version;
     };
 
     #undef network_base_t

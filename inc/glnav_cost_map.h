@@ -3,22 +3,26 @@
 
 #include "glnav_point.h"
 #include "glnav_network.h"
+#include "glnav_version_control.h"
 #include <map>
 
 namespace glnav
 {
     template<typename T>
-    class cost_map : private std::map<point<T> , double>
+    class cost_map : private std::map<point<T> , double>,
+        public version_controlled
     {
     public:
         cost_map() 
             : std::map<point<T> , double>(),
+            version_controlled(),
             __net(nullptr),
             __seed(0)
         { }
 
         cost_map(const network<T> &net)
             : std::map<point<T> , double>(net.node_map(std::numeric_limits<double>::infinity())),
+            version_controlled(net),
             __net(&net),
             __seed(net.version())
         { }
@@ -29,7 +33,7 @@ namespace glnav
         double cost(const point<T> &input) const
         {
             // Perform version check
-            if(this->__net != nullptr && this->__seed != this->__net->version())
+            if(this->__net != nullptr && !this->versions_syncronized(*this->__net))
                 throw version_mismatch(this->__seed, this->__net->version());
 
             const typename std::map<point<T> , double>::const_iterator it = this->find(input);
