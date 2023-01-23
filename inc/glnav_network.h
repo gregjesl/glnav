@@ -4,18 +4,21 @@
 #include "glnav_point.h"
 #include "glnav_edge.h"
 #include "glnav_version_control.h"
+#include "glnav_neighbor.h"
 #include <assert.h>
 #include <map>
 #include <inttypes.h>
 
 namespace glnav
 {
+
     template<typename T>
     class neighbor_map : private std::map<const point<T> * const, double>
     {
     public:
-        neighbor_map()
-            : std::map<const point<T> * const, double>()
+        neighbor_map(const point<T> &origin)
+            : std::map<const point<T> * const, double>(),
+            __origin(origin)
         { }
 
         void update(const point<T> * const neighbor, const double cost)
@@ -33,6 +36,8 @@ namespace glnav
             }
         }
 
+        const point<T> & origin() const { return this->__origin; }
+
         using std::map<const point<T> * const, double>::erase;
 
         double cost(const point<T> * const to) const
@@ -41,18 +46,21 @@ namespace glnav
             return it != this->end() ? it->second : std::numeric_limits<double>::infinity();
         }
 
-        std::vector<std::pair<point<T>, double> > neighbors() const
+        neighborhood<T, double> neighbors() const
         {
-            std::vector<std::pair<point<T>, double> > result;
+            neighborhood<T, double> result(this->__origin);
             typename std::map<const point<T> * const, double>::const_iterator it;
             for(it = this->begin(); it != this->end(); ++it)
             {
                 result.push_back(
-                    std::pair<point<T>, double>(*it->first, it->second)
+                    neighbor<T, double>(*it->first, it->second)
                     );
             }
             return result;
         }
+
+    private:
+        point<T> __origin;
     };
 
     #define network_base_t point_map<T, neighbor_map<T> >
@@ -84,19 +92,19 @@ namespace glnav
             for(it = other.begin(); it != other.end(); ++it)
             {
                 this->insert(
-                    std::pair<point<T>, neighbor_map<T> >(it->first, neighbor_map<T>())
+                    std::pair<point<T>, neighbor_map<T> >(it->first, neighbor_map<T>(it->first))
                 );
             }
 
             // Copy the paths
             for(it = other.begin(); it != other.end(); ++it)
             {
-                std::vector<std::pair<point<T>, double> > neighbors = it->second.neighbors();
+                neighborhood<T, double> neighbors = it->second.neighbors();
                 for(size_t i = 0; i < neighbors.size(); i++)
                 {
-                    typename network_base_t::iterator internal = this->find(neighbors.at(i).first);
+                    typename network_base_t::iterator internal = this->find(neighbors.at(i));
                     assert(internal != this->end());
-                    internal->second.update(&internal->first, neighbors.at(i).second);
+                    internal->second.update(&internal->first, neighbors.at(i).cost);
                 }
             }
 
@@ -121,10 +129,10 @@ namespace glnav
             typename network_base_t::iterator it = this->find(node);
             if(it == this->end()) return;
             const point<T> * end_ptr = &it->first;
-            std::vector<std::pair<point<T>, double> > neighbors = it->second.neighbors();
+            neighborhood<T, double> neighbors = it->second.neighbors();
             for(size_t i = 0; i < neighbors.size(); i++)
             {
-                typename network_base_t::iterator it = this->find(neighbors.at(i).first);
+                typename network_base_t::iterator it = this->find(neighbors.at(i));
                 assert(it != this->end());
                 it->second.erase(end_ptr);
             }
@@ -149,9 +157,9 @@ namespace glnav
             return start_it->second.cost(end_ptr);
         }
 
-        std::vector<std::pair<point<T>, double> > neighbors(const point<T> &node) const
+        neighborhood<T, double> neighbors(const point<T> &node) const
         {
-            std::vector<std::pair<point<T>, double> > result;
+            neighborhood<T, double> result(node);
             typename network_base_t::const_iterator start_it = this->find(node);
             if(start_it == this->end()) throw unknown_point_exception<T>(node);
             return start_it->second.neighbors();
@@ -188,7 +196,7 @@ namespace glnav
                         >
                         (
                             start,
-                            neighbor_map<T>()
+                            neighbor_map<T>(start)
                         )
                     );
                 start_it = this->find(start);
@@ -204,7 +212,7 @@ namespace glnav
                         >
                         (
                             end,
-                            neighbor_map<T>()
+                            neighbor_map<T>(end)
                         )
                     );
                 end_it = this->find(end);

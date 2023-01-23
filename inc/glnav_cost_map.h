@@ -4,6 +4,7 @@
 #include "glnav_point.h"
 #include "glnav_network.h"
 #include "glnav_version_control.h"
+#include "glnav_neighbor.h"
 #include <map>
 
 namespace glnav
@@ -109,14 +110,14 @@ namespace glnav
             typename std::map<point<T> , double>::iterator it;
             for(it = this->begin(); it != this->end(); ++it)
             {
-                std::vector<std::pair<point<T>, double> > neighbors = this->__net->neighbors(it->first);
+                neighborhood<T, double> neighbors = this->__net->neighbors(it->first);
                 for(size_t i = 0; i < neighbors.size(); i++)
                 {
-                    assert(this->find(neighbors.at(i).first) != this->end());
-                    const double test_cost = it->second + neighbors.at(i).second;
-                    if(test_cost < this->cost(neighbors.at(i).first))
+                    assert(this->find(neighbors.at(i)) != this->end());
+                    const double test_cost = it->second + neighbors.at(i).cost;
+                    if(test_cost < this->cost(neighbors.at(i)))
                     {
-                        this->set(neighbors.at(i).first, test_cost);
+                        this->set(neighbors.at(i), test_cost);
                         num_changes++;
                     }
                 }

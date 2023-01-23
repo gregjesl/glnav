@@ -53,12 +53,12 @@ namespace glnav
                 return;
             }
 
-            const std::vector<std::pair<point<T>, double> > neighbors = this->__net.neighbors(current);
+            const neighborhood<T, double> neighbors = this->__net.neighbors(current);
             assert(neighbors.size() > 0);
             for(size_t i = 0; i < neighbors.size(); i++)
             {
-                const double tentative = this->__gscore.cost(current) + neighbors.at(i).second;
-                const point<T> &neighbor = neighbors.at(i).first;
+                const double tentative = this->__gscore.cost(current) + neighbors.at(i).cost;
+                const point<T> &neighbor = neighbors.at(i);
                 if(tentative < this->__gscore.cost(neighbor))
                 {
                     this->__path.set(neighbor, current);

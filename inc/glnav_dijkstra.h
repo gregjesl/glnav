@@ -45,14 +45,14 @@ namespace glnav
             result.push_back(this->__from);
             while(result.back() != this->__to)
             {
-                const std::vector<std::pair<point<T>, double> > neighbors = this->__net.neighbors(result.back());
+                const neighborhood<T, double> neighbors = this->__net.neighbors(result.back());
                 assert(neighbors.size() > 0);
-                point<T> next = neighbors.at(0).first;
+                point<T> next = neighbors.at(0);
                 double cost = this->__map.cost(next);
                 for(size_t i = 1; i < neighbors.size(); i++)
                 {
-                    if(this->__map.cost(neighbors.at(i).first) < cost) {
-                        next = neighbors.at(i).first;
+                    if(this->__map.cost(neighbors.at(i)) < cost) {
+                        next = neighbors.at(i);
                         cost = this->__map.cost(next);
                     }
                 }

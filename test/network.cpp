@@ -21,8 +21,8 @@ int main(void)
     TEST_TRUE(test.cost(start, end) > 2.0);
     TEST_TRUE(test.cost(start, end) < 4.0);
     TEST_EQUAL(test.neighbors(start).size(), 1);
-    TEST_TRUE(test.neighbors(start).at(0).first == end);
-    TEST_TRUE(test.neighbors(end).at(0).first == start);
+    TEST_TRUE(test.neighbors(start).at(0) == end);
+    TEST_TRUE(test.neighbors(end).at(0) == start);
 
     // Attempt to add the same path
     test.add(test_path, test_path.length());
@@ -55,8 +55,8 @@ int main(void)
     test.remove(other);
     TEST_EQUAL(test.version(), 5);
     TEST_EQUAL(test.neighbors(start).size(), 1);
-    TEST_TRUE(test.neighbors(start).at(0).first == end);
-    TEST_TRUE(test.neighbors(end).at(0).first == start);
+    TEST_TRUE(test.neighbors(start).at(0) == end);
+    TEST_TRUE(test.neighbors(end).at(0) == start);
 
     // Connect networks
     glnav::network<int> next;
