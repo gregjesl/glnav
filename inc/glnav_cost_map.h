@@ -8,7 +8,7 @@
 namespace glnav
 {
     template<typename T>
-    class cost_map : public std::map<point<T> , double>
+    class cost_map : private std::map<point<T> , double>
     {
     public:
         cost_map() 
@@ -23,13 +23,8 @@ namespace glnav
             __seed(net.version())
         { }
 
-        cost_map& operator=(const cost_map &other)
-        {
-            std::map<point<T> , double>::operator=(other);
-            this->__net = other.__net;
-            this->__seed = other.__seed;
-            return *this;
-        }
+        using std::map<point<T> , double>::size;
+        using std::map<point<T> , double>::empty;
         
         double cost(const point<T> &input) const
         {
@@ -95,7 +90,7 @@ namespace glnav
             assert(this->size() == this->__net->size());
             
             size_t num_changes = 0;
-            const typename std::map<point<T> , double>::const_iterator it;
+            typename std::map<point<T> , double>::iterator it;
             for(it = this->begin(); it != this->end(); ++it)
             {
                 std::vector<std::pair<point<T>, double> > neighbors = this->__net->neighbors(it->first);

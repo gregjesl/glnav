@@ -29,24 +29,7 @@ namespace glnav
             // Check for version update
             if(this->__net.version() != this->__version) this->reset();
 
-            size_t num_changes = 0;
-            typename cost_map<T>::iterator it;
-            for(it = this->__map.begin(); it != this->__map.end(); ++it)
-            {
-                assert(this->__net.contains(it->first));
-                std::vector<std::pair<point<T>, double> > neighbors = this->__net.neighbors(it->first);
-                bool changed = false;
-                for(size_t i = 0; i < neighbors.size(); i++)
-                {
-                    const point<T> &neighbor = neighbors.at(i).first;
-                    const double test_cost = this->__map.cost(neighbor) + neighbors.at(i).second;
-                    if(test_cost < it->second) {
-                        changed = true;
-                        it->second = test_cost;
-                    }
-                }
-                if(changed) num_changes++;
-            }
+            size_t num_changes = this->__map.iterate();
             if(num_changes == 0) this->__solved = true;
             return num_changes;
         }
