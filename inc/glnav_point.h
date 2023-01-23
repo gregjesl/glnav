@@ -255,6 +255,19 @@ namespace glnav
             }
             return it == this->end(); // Return true if new
         }
+
+        point_group<T> overlap(const point_map<T, Q> &other) const
+        {
+            point_group<T> result;
+            typename point_map<T, Q>::const_iterator core;
+            for(core = this->begin(); core != this->end(); ++core)
+            {
+                if(other.contains(core->first)) {
+                    result.push_back(core->first);
+                }
+            }
+            return result;
+        }
     };
 }
 

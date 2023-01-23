@@ -55,7 +55,7 @@ namespace glnav
         }
     };
 
-    #define network_base_t std::map<const point<T>, neighbor_map<T> >
+    #define network_base_t point_map<T, neighbor_map<T> >
     typedef uint64_t version_t;
 
     template<typename T>
@@ -132,20 +132,18 @@ namespace glnav
             this->update_version();
         }
 
-        bool contains(const point<T> &node) const
-        {
-            return this->find(node) != this->end();
-        }
-
         using network_base_t::size;
+        using network_base_t::empty;
+        using network_base_t::contains;
+        using network_base_t::overlap;
 
         double cost(const point<T> &from, const point<T> &to) const
         {
             typename network_base_t::const_iterator start_it = this->find(from);
-            if(start_it == this->end()) return std::numeric_limits<double>::infinity();
+            if(start_it == this->end()) throw unknown_point_exception<T>(from);
 
             typename network_base_t::const_iterator end_it = this->find(to);
-            if(end_it == this->end()) return std::numeric_limits<double>::infinity();
+            if(end_it == this->end()) throw unknown_point_exception<T>(to);
             const point<T> * end_ptr = &end_it->first;
 
             return start_it->second.cost(end_ptr);
@@ -155,7 +153,7 @@ namespace glnav
         {
             std::vector<std::pair<point<T>, double> > result;
             typename network_base_t::const_iterator start_it = this->find(node);
-            if(start_it == this->end()) return result;
+            if(start_it == this->end()) throw unknown_point_exception<T>(node);
             return start_it->second.neighbors();
         }
 
@@ -174,15 +172,7 @@ namespace glnav
 
         point_group<T> overlap(const network<T> &other) const
         {
-            point_group<T> result;
-            typename network_base_t::const_iterator core;
-            for(core = this->begin(); core != this->end(); ++core)
-            {
-                if(other.contains(core->first)) {
-                    result.push_back(core->first);
-                }
-            }
-            return result;
+            return network_base_t::overlap(other);
         }
 
     private:
