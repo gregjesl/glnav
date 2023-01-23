@@ -224,6 +224,12 @@ namespace glnav
             : std::map<point<T>, Q>(other)
         { }
 
+        point_map& operator=(const point_map &other)
+        {
+            std::map<point<T>, Q>::operator=(other);
+            return *this;
+        }
+
         bool contains(const point<T> &input) const { return this->find(input) != this->end(); }
 
         const Q * get(const point<T> &key) const

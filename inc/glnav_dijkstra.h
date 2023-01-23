@@ -13,7 +13,6 @@ namespace glnav
     public:
         dijkstra(network<T> &net, const point<T> &from, const point<T> &to)
             : __net(net),
-            __map(net),
             __from(from),
             __to(to),
             __solved(false)

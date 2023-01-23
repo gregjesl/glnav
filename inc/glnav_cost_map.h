@@ -25,6 +25,14 @@ namespace glnav
             __net(&net)
         { }
 
+        cost_map& operator=(const cost_map<T> &other)
+        {
+            point_map<T, double>::operator=(other);
+            if(other.__net != nullptr)
+                this->attach(*other.__net);
+            return *this;
+        }
+
         using point_map<T, double>::size;
         using point_map<T, double>::empty;
         
@@ -68,7 +76,7 @@ namespace glnav
             }
 
             this->__net = &net;
-            this->__seed = net.version();
+            this->set_version(this->__net->version());
         }
 
         void detatch()
