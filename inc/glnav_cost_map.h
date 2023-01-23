@@ -48,7 +48,7 @@ namespace glnav
                 if(this->__seed != this->__net->version())
                     throw version_mismatch(this->__seed, this->__net->version());
                 
-                if(this->__net->contains(input))
+                if(!this->__net->contains(input))
                     throw std::out_of_range("Point is not in network");
             }
 
@@ -91,7 +91,7 @@ namespace glnav
             this->__seed = 0;
         }
 
-        const network<T> network() const { return this->__net; }
+        const network<T>& network() const { return this->__net; }
         bool is_attached() const { return this->__net != nullptr; }
         bool is_syncronized() const
         {
@@ -141,6 +141,8 @@ namespace glnav
             }
             return result;
         }
+
+        version_t version() const { return this->__seed; }
     private:
         const glnav::network<T> * __net;
         version_t __seed;
