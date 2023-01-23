@@ -43,23 +43,20 @@ namespace glnav
         void set(const point<T> &input, const double value)
         {
             // Perform version check
-            if(this->__net != nullptr && this->__seed != this->__net->version())
-                throw version_mismatch(this->__seed, this->__net->version());
-
-            // Verify the point is contained
-            assert(this->__net == nullptr || this->size() == this->__net->size());
-            assert(this->__net == nullptr || this->__net->contains(input));
+            if(this->__net != nullptr)
+            {
+                if(this->__seed != this->__net->version())
+                    throw version_mismatch(this->__seed, this->__net->version());
+                
+                if(this->__net->contains(input))
+                    throw std::out_of_range("Point is not in network");
+            }
 
             const typename std::map<point<T> , double>::iterator it = this->find(input);
             if(it != this->end())
             {
                 it->second = value;
             }
-            else if(this->__net != nullptr)
-            {
-                assert(!this->__net->contains(input));
-                throw std::out_of_range("Point is not in network");
-            } 
             else 
             {
                 this->insert(
@@ -67,6 +64,31 @@ namespace glnav
                         (input, value)
                 );
             }
+        }
+
+        void attach(const glnav::network<T> &net)
+        {
+            if(this->__net != nullptr)
+                throw std::runtime_error("Already attached to a network");
+            
+            if(!this->empty())
+            {
+                typename std::map<point<T> , double>::const_iterator it;
+                for(it = this->begin(); it != this->end(); ++it)
+                {
+                    if(!net.contains(it->first))
+                        throw std::runtime_error("Orphaned point");
+                }
+            }
+
+            this->__net = &net;
+            this->__seed = net.version();
+        }
+
+        void detatch()
+        {
+            this->__net = nullptr;
+            this->__seed = 0;
         }
 
         const network<T> network() const { return this->__net; }
