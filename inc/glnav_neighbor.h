@@ -2,33 +2,30 @@
 #define GLNAV_NEIGHBOR_H
 
 #include "glnav_point.h"
+#include "glnav_node.h"
+#include <vector>
 
 namespace glnav
 {
     template<typename T, typename Q>
-    class neighbor : public point<T>
+    class neighbor : public node<T>
     {
     public:
         neighbor(const point<T> &location, const Q cost)
-            : point<T>(location),
+            : node<T>(location), 
             cost(cost)
         { }
 
         neighbor(const neighbor &other)
-            : point<T>(other),
+            : node<T>(other),
             cost(other.cost)
         { }
 
-        neighbor& operator=(const neighbor &other)
+        neighbor& operator=(neighbor &other)
         {
-            point<T>::operator=(other);
+            node<T>::operator=(other);
             this->cost = other.cost;
             return *this;
-        }
-
-        bool is_located_at(const point<T> &location) const
-        {
-            return point<T>::operator=(location);
         }
 
         Q cost;
@@ -38,25 +35,21 @@ namespace glnav
     class neighborhood : public std::vector<neighbor<T, Q> >
     {
     public:
-        neighborhood(const point<T> &origin)
-            : std::vector<neighbor<T, Q> >(),
-            __origin(origin)
+        neighborhood()
+            : std::vector<neighbor<T, Q> >()
         { }
 
         neighborhood(const neighborhood &other)
-            : std::vector<neighbor<T, Q> >(other),
-            __origin(other.__origin)
+            : std::vector<neighbor<T, Q> >(other)
         { }
 
         neighborhood& operator=(const neighborhood &other)
         {
             std::vector<neighbor<T, Q> >::operator=(other);
-            this->__origin = other.__origin;
             return *this;
         }
 
-        /*! \warning The origin is not included in the search */
-        bool contains(const point<T> &location)
+        bool contains(const point<T> &location) const
         {
             for(size_t i = 0; i < this->size(); i++)
             {
@@ -64,8 +57,15 @@ namespace glnav
             }
             return false;
         }
-    private:
-        point<T> __origin;
+
+        Q cost(const point<T> &location) const
+        {
+            for(size_t i = 0; i < this->size(); i++)
+            {
+                if(this->at(i).is_located_at(location)) return this->at(i).cost;
+            }
+            throw glnav::unknown_point_exception<T>(location);
+        }
     };
 }
 

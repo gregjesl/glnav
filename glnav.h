@@ -9,7 +9,7 @@
 #include "inc/glnav_network.h"
 #include "inc/glnav_cost_map.h"
 #include "inc/glnav_edge_map.h"
-#include "inc/glnav_dijkstra.h"
-#include "inc/glnav_astar.h"
+// #include "inc/glnav_dijkstra.h"
+// #include "inc/glnav_astar.h"
 
 #endif

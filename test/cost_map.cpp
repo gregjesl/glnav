@@ -4,7 +4,7 @@
 
 int main(void)
 {
-    glnav::cost_map<int> map;
+    glnav::cost_map<int, double> map;
 
     const glnav::point<int> test_point = glnav::point<int>(1, 1);
     map.set(test_point, std::numeric_limits<double>::infinity());

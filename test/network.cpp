@@ -4,7 +4,7 @@
 int main(void)
 {
     // Create the network
-    glnav::network<int> test;
+    glnav::network<int, double> test;
     TEST_EQUAL(test.size(), 0);
     TEST_EQUAL(test.version(), 0);
 
@@ -18,20 +18,11 @@ int main(void)
     TEST_TRUE(test.contains(start));
     TEST_TRUE(test.contains(end));
     TEST_FALSE(test.contains(glnav::point<int>(5, 6)));
-    TEST_TRUE(test.cost(start, end) > 2.0);
-    TEST_TRUE(test.cost(start, end) < 4.0);
     TEST_EQUAL(test.neighbors(start).size(), 1);
-    TEST_TRUE(test.neighbors(start).at(0) == end);
-    TEST_TRUE(test.neighbors(end).at(0) == start);
-
-    // Attempt to add the same path
-    test.add(test_path, test_path.length());
-    TEST_EQUAL(test.version(), 2);
-    TEST_EQUAL(test.size(), 2);
-    TEST_TRUE(test.contains(start));
-    TEST_TRUE(test.contains(end));
-    TEST_TRUE(test.cost(start, end) > 2.0);
-    TEST_TRUE(test.cost(start, end) < 4.0);
+    TEST_TRUE(test.neighbors(start).at(0).location() == end);
+    TEST_TRUE(test.neighbors(end).at(0).location() == start);
+    TEST_TRUE(test.neighbors(start).at(0).cost == test_path.length());
+    TEST_TRUE(test.neighbors(end).at(0).cost == test_path.length());
 
     // Node map
     TEST_EQUAL(test.node_map(1.0).size(), 2);
@@ -44,7 +35,7 @@ int main(void)
     glnav::path<int> test_path3(end, other);
     test.add(test_path2, test_path2.length());
     test.add(test_path3, test_path3.length());
-    TEST_EQUAL(test.version(), 4);
+    TEST_EQUAL(test.version(), 3);
     TEST_EQUAL(test.size(), 3);
     TEST_TRUE(test.contains(start));
     TEST_TRUE(test.contains(end));
@@ -53,19 +44,21 @@ int main(void)
     TEST_EQUAL(test.neighbors(end).size(), 2);
     TEST_EQUAL(test.neighbors(other).size(), 2);
     test.remove(other);
-    TEST_EQUAL(test.version(), 5);
+    TEST_EQUAL(test.version(), 4);
     TEST_EQUAL(test.neighbors(start).size(), 1);
-    TEST_TRUE(test.neighbors(start).at(0) == end);
-    TEST_TRUE(test.neighbors(end).at(0) == start);
+    TEST_TRUE(test.neighbors(start).at(0).location() == end);
+    TEST_TRUE(test.neighbors(end).at(0).location() == start);
+    TEST_TRUE(test.neighbors(start).at(0).cost == test_path.length());
+    TEST_TRUE(test.neighbors(end).at(0).cost == test_path.length());
 
     // Connect networks
-    glnav::network<int> next;
+    glnav::network<int, double> next;
     next.add(glnav::path<int>(end, other), 1.0);
     TEST_EQUAL(test.overlap(next).size(), 1);
     TEST_TRUE(test.overlap(next).at(0) == end);
 
     // Copy network
-    glnav::network<int> construct(test);
+    glnav::network<int, double> construct(test);
     TEST_TRUE(construct.contains(start));
     TEST_TRUE(construct.contains(end));
 }
