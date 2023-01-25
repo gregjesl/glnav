@@ -36,6 +36,7 @@ namespace glnav
 
         using point_map<T, Q>::size;
         using point_map<T, Q>::empty;
+        using point_map<T, Q>::contains;
         
         Q cost(const point<T> &input) const
         {
@@ -83,7 +84,7 @@ namespace glnav
         void detatch()
         {
             this->__net = nullptr;
-            this->__seed = 0;
+            this->set_version(0);
         }
 
         const network<T, Q>& network() const { return this->__net; }
@@ -137,7 +138,16 @@ namespace glnav
             return result;
         }
 
-        version_t version() const { return this->__seed; }
+        neighborhood<T, Q> as_neighborhood() const
+        {
+            neighborhood<T, Q> result;
+            typename std::map<point<T> , Q>::const_iterator it;
+            for(it = this->begin(); it != this->end(); ++it)
+            {
+                result.push_back(neighbor<T, Q>(it->first, it->second));
+            }
+            return result;
+        }
     private:
         const glnav::network<T, Q> * __net;
     };

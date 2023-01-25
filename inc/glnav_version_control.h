@@ -28,6 +28,11 @@ namespace glnav
             this->__version = version;
         }
 
+        void synchronize_version(const version_dependent &other)
+        {
+            this->__version = other.__version;
+        }
+
         version_t version() const { return this->__version; }
 
         bool versions_synchronized(const version_dependent &other) const
