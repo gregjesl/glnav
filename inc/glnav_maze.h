@@ -83,13 +83,21 @@ namespace glnav
 
         void update(const cost_map<T, Q> &onramp, const cost_map<T, Q> &offramp)
         {
-            this->__attach_ramps();
-            if(!this->__net.versions_synchronized(onramp)) throw version_mismatch(this->__net, onramp);
-            if(!this->__net.versions_synchronized(offramp)) throw version_mismatch(this->__net, offramp);
             this->__onramp = onramp;
             this->__offramp = offramp;
+            this->__attach_ramps();
+            if(!this->__net.versions_synchronized(this->__onramp)) throw version_mismatch(this->__net, this->__onramp);
+            if(!this->__net.versions_synchronized(this->__offramp)) throw version_mismatch(this->__net, this->__offramp);
             this->set_version(this->__net.version());
             assert(this->is_synchronized());
+        }
+
+        void update(const point<T> &start, const point<T> &finish, const cost_map<T, Q> &onramp, const cost_map<T, Q> &offramp)
+        {
+            this->__start = start;
+            this->__finish = finish;
+            this->update(onramp, offramp);
+            this->__verify_resync();
         }
 
         neighborhood<T, Q> neighbors(const point<T> &from) const
@@ -129,7 +137,7 @@ namespace glnav
 
             if(this->__offramp.contains(from))
             {
-                result.push_back(neighbor<T, Q>(this->__finish, this->__onramp.cost(from)));
+                result.push_back(neighbor<T, Q>(this->__finish, this->__offramp.cost(from)));
             }
 
             return result;
