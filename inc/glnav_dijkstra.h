@@ -69,10 +69,11 @@ namespace glnav
             route<T, Q> result(this->__maze.network());            
             if(!this->is_solved()) return result;
 
-            result.push_back(this->__maze.start(), 1);
-            while(result.back().first != this->__maze.finish())
+            point<T> current = this->__maze.start();
+
+            while(current != this->__maze.finish())
             {
-                const neighborhood<T, Q> neighbors = this->__maze.neighbors(result.back().first);
+                const neighborhood<T, Q> neighbors = this->__maze.neighbors(current);
                 assert(neighbors.size() > 0);
                 point<T> next = neighbors.at(0).location();
                 double cost = this->__map.cost(next);
@@ -87,17 +88,19 @@ namespace glnav
                 // Check for loop
                 for(size_t i = 0; i < result.size(); i++)
                 {
-                    if(result[i].first == next) throw std::runtime_error("Loop detected");
+                    if(result[i].target == next) throw std::runtime_error("Loop detected");
                 }
 
                 // Set the speed
-                const Q delta_cost = this->__map.cost(result.back().first) - this->__map.cost(next);
-                const path<T> next_path = path<T>(result.back().first, next);
+                const Q delta_cost = this->__map.cost(current) - this->__map.cost(next);
+                const path<T> next_path = path<T>(current, next);
                 const Q distance = glnav::length<T, Q>(next_path);
-                result.back().second = distance / delta_cost;
 
                 // Set the new waypoint
-                result.push_back(next, 1);
+                result.push_back(next, distance / delta_cost);
+                
+                // Move the points
+                current = next;
             }
 
             return result;

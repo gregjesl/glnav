@@ -36,9 +36,8 @@ int main(void)
 
     TEST_TRUE(test.is_solved());
     glnav::route<double, double> solution = test.build_route();
-    TEST_EQUAL(solution.size(), 4);
-    TEST_TRUE(solution[0].first == start);
-    TEST_TRUE(solution[1].first == point2);
-    TEST_TRUE(solution[2].first == point4);
-    TEST_TRUE(solution[3].first == finish);
+    TEST_EQUAL(solution.size(), 3);
+    TEST_TRUE(solution[0].target == point2);
+    TEST_TRUE(solution[1].target == point4);
+    TEST_TRUE(solution[2].target == finish);
 }
