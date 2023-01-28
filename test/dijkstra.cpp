@@ -3,8 +3,7 @@
 
 int main(void)
 {
-    /*
-    glnav::network<double> net;
+    glnav::network<double, double> net;
     const glnav::point<double> point1(0, -2);
     const glnav::point<double> point2(0, 1);
     const glnav::point<double> point3(2, -3);
@@ -24,15 +23,19 @@ int main(void)
     net.add(finish1, start1.length());
     net.add(finish2, start2.length());
 
-    glnav::dijkstra<double> test(net, start, finish);
+    glnav::maze<double, double> _maze(net, start, finish);
+    glnav::dijkstra<double, double> test(_maze);
     TEST_FALSE(test.is_solved());
 
-    while(test.iterate() > 0)
+    const size_t max_iterations = 100;
+    size_t iterations = 0;
+    while(!test.is_solved() > 0 && iterations++ < max_iterations)
     {
-        // Loop
+        test.iterate();
     }
 
     TEST_TRUE(test.is_solved());
+    /*
     const glnav::point_group<double> solution = test.route();
     TEST_EQUAL(solution.size(), 4);
     TEST_TRUE(solution.at(0) == start);

@@ -143,6 +143,26 @@ namespace glnav
             return result;
         }
 
+        cost_map<T, Q> seed_map() const
+        {
+            this->__force_synchronization();
+            cost_map<T, Q> result(this->__net);
+            if(!this->__onramp.empty())
+            {
+                assert(!this->__net.contains(this->__start));
+                result.set(this->__start, std::numeric_limits<Q>::infinity());
+            }
+            if(!this->__offramp.empty())
+            {
+                assert(!this->__net.contains(this->__finish));
+                result.set(this->__finish, std::numeric_limits<Q>::infinity());
+            }
+            return result;       
+        }
+
+        const point<T> & start() const { return this->__start; }
+        const point<T> & finish() const { return this->__finish; }
+
     private:
         const network<T, Q> &__net;
         point<T> __start;
