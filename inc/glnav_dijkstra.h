@@ -89,6 +89,13 @@ namespace glnav
                 {
                     if(result[i].first == next) throw std::runtime_error("Loop detected");
                 }
+
+                // Set the speed
+                const Q delta_cost = this->__map.cost(result.back().first) - this->__map.cost(next);
+                const Q distance = path<T>(result.back().first, next).length();
+                result.back().second = distance / delta_cost;
+
+                // Set the new waypoint
                 result.push_back(next, 1);
             }
 

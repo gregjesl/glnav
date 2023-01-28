@@ -18,6 +18,7 @@ namespace glnav
             __seed(seed)
         { }
 
+        using std::deque<std::pair<point<T>, Q> >::empty;
         using std::deque<std::pair<point<T>, Q> >::size;
         using std::deque<std::pair<point<T>, Q> >::clear;
         using std::deque<std::pair<point<T>, Q> >::operator[];
@@ -54,14 +55,28 @@ namespace glnav
             return std::deque<std::pair<point<T>, Q> >::pop_back();
         }
 
-        std::pair<point<T>, Q> front()
+        std::pair<point<T>, Q> & front()
         {
             assert_version(*this, this->__seed);
 
             return std::deque<std::pair<point<T>, Q> >::front();
         }
 
-        std::pair<point<T>, Q> back()
+        std::pair<point<T>, Q> & back()
+        {
+            assert_version(*this, this->__seed);
+
+            return std::deque<std::pair<point<T>, Q> >::back();
+        }
+
+        const std::pair<point<T>, Q> & front() const
+        {
+            assert_version(*this, this->__seed);
+
+            return std::deque<std::pair<point<T>, Q> >::front();
+        }
+
+        const std::pair<point<T>, Q> & back() const
         {
             assert_version(*this, this->__seed);
 
