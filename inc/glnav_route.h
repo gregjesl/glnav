@@ -1,46 +1,75 @@
 #ifndef GLNAV_ROUTE_H
 #define GLNAV_ROUTE_H
 
-#include "glnav_waypoint.h"
-#include "glnav_cartesian.h"
-#include <list>
+#include "glnav_neighbor.h"
+#include "glnav_network.h"
+#include "glnav_version_control.h"
+#include <deque>
 
 namespace glnav
 {
-    template<typename T>
-    class route : virtual public cartesian_object<T>, private std::list<waypoint<T> >
+    template<typename T, typename Q>
+    class route : private std::deque<std::pair<point<T>, Q> >, public version_dependent
     {
     public:
-        typedef std::list<waypoint<T> > waypoints_t;
-        route(const waypoint &seed)
-            : cartesian_object<T>(),
-            waypoints_t()
+        route(const network<T, Q> &seed)
+            : std::deque<std::pair<point<T>, Q> >(),
+            version_dependent(seed),
+            __seed(seed)
         { }
-        virtual T minX() const { return this->__minX; }
-        virtual T maxX() const { return this->__maxX; }
-        virtual T minY() const { return this->__minX; }
-        virtual T maxY() const { return this->__maxX; }
+
+        using std::deque<std::pair<point<T>, Q> >::size;
+        using std::deque<std::pair<point<T>, Q> >::clear;
+        using std::deque<std::pair<point<T>, Q> >::operator[];
+
+        void push_front(const point<T> & waypoint, const Q speed)
+        {
+            assert_version(*this, this->__seed);
+
+            std::deque<std::pair<point<T>, Q> >::push_front(
+                std::pair<point<T> , Q>(waypoint, speed)
+            );
+        }
+
+        void push_back(const point<T> & waypoint, const Q speed)
+        {
+            assert_version(*this, this->__seed);
+
+            std::deque<std::pair<point<T>, Q> >::push_back(
+                std::pair<point<T> , Q>(waypoint, speed)
+            );
+        }
+
+        std::pair<point<T>, Q> pop_front()
+        {
+            assert_version(*this, this->__seed);
+
+            return std::deque<std::pair<point<T>, Q> >::pop_front();
+        }
+
+        std::pair<point<T>, Q> pop_back()
+        {
+            assert_version(*this, this->__seed);
+
+            return std::deque<std::pair<point<T>, Q> >::pop_back();
+        }
+
+        std::pair<point<T>, Q> front()
+        {
+            assert_version(*this, this->__seed);
+
+            return std::deque<std::pair<point<T>, Q> >::front();
+        }
+
+        std::pair<point<T>, Q> back()
+        {
+            assert_version(*this, this->__seed);
+
+            return std::deque<std::pair<point<T>, Q> >::back();
+        }
+    
     private:
-        T __minX;
-        T __minY;
-        T __maxX;
-        T __maxY;
-
-        void __update_min(const T input, T &value)
-        {
-            if(input < value) input = value;
-        }
-
-        void __update_max(const T input, T &value)
-        {
-            if(input > value) input = value;
-        }
-
-        void __update_axis(const T value, T &min, T &max)
-        {
-            this->__update_min(value, min);
-            this->__update_max(value, max);
-        }
+        const network<T, Q> & __seed;
     };
 }
 

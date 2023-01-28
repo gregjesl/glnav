@@ -4,6 +4,7 @@
 #include "glnav_version_control.h"
 #include "glnav_maze.h"
 #include "glnav_cost_map.h"
+#include "glnav_route.h"
 #include <stdexcept>
 #include <set>
 #include <stack>
@@ -17,10 +18,10 @@ namespace glnav
         dijkstra(const maze<T, Q> &input)
             : version_dependent(input), 
             __maze(input),
-            __map(input.seed_map()),
-            __solved(false)
+            __map(input.seed_map())
         { 
             this->__to_go.insert(input.finish());
+            this->__map.set(this->__maze.finish(), 0);
         }
 
         virtual ~dijkstra()
@@ -55,7 +56,7 @@ namespace glnav
                 if(test_cost < this->__map.cost(location))
                 {
                     this->__map.set(location, test_cost);
-                    if(this->__to_go.find(location) != this->__to_go.end())
+                    if(this->__to_go.find(location) == this->__to_go.end())
                         this->__to_go.insert(location);
                 }
             }
@@ -63,31 +64,34 @@ namespace glnav
 
         bool is_solved() const { return this->__to_go.empty(); }
 
-        point_group<T> route() const
+        route<T, Q> build_route() const
         {
-            point_group<T> result;
-            if(!this->__solved) return result;
-            assert(this->__net.contains(this->__from));
-            assert(this->__net.contains(this->__to));
-            if(this->__map.cost(this->__from) == std::numeric_limits<double>::infinity()) return result;
-            result.push_back(this->__from);
-            while(result.back() != this->__to)
+            route<T, Q> result(this->__maze.network());            
+            if(!this->is_solved()) return result;
+
+            result.push_back(this->__maze.start(), 1);
+            while(result.back().first != this->__maze.finish())
             {
-                const neighborhood<T, double> neighbors = this->__net.neighbors(result.back());
+                const neighborhood<T, Q> neighbors = this->__maze.neighbors(result.back().first);
                 assert(neighbors.size() > 0);
-                point<T> next = neighbors.at(0);
+                point<T> next = neighbors.at(0).location();
                 double cost = this->__map.cost(next);
                 for(size_t i = 1; i < neighbors.size(); i++)
                 {
-                    if(this->__map.cost(neighbors.at(i)) < cost) {
-                        next = neighbors.at(i);
+                    if(this->__map.cost(neighbors.at(i).location()) < cost) {
+                        next = neighbors.at(i).location();
                         cost = this->__map.cost(next);
                     }
                 }
-                if(result.contains(next)) throw std::runtime_error("Loop detected");
-                result.push_back(next);
-                assert(result.size() < this->__net.size());
+
+                // Check for loop
+                for(size_t i = 0; i < result.size(); i++)
+                {
+                    if(result[i].first == next) throw std::runtime_error("Loop detected");
+                }
+                result.push_back(next, 1);
             }
+
             return result;
         }
 
@@ -97,14 +101,12 @@ namespace glnav
             this->__map.set(this->__maze.finish(), 0);
             this->__to_go.clear();
             this->__to_go.insert(this->__maze.finish());
-            this->__solved = false;
             this->synchronize_version(this->__maze);
         }
     private:
         const maze<T, Q> & __maze;
         cost_map<T, Q> __map;
         std::set<point<T> > __to_go;
-        bool __solved;
     };
 }
 

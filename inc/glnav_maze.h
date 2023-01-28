@@ -65,6 +65,8 @@ namespace glnav
             
         }
 
+        const network<T, Q> & network() const { return this->__net; }
+
         bool is_synchronized() const
         {
             return this->versions_synchronized(this->__net)
@@ -164,7 +166,7 @@ namespace glnav
         const point<T> & finish() const { return this->__finish; }
 
     private:
-        const network<T, Q> &__net;
+        const glnav::network<T, Q> &__net;
         point<T> __start;
         point<T> __finish;
         cost_map<T, Q> __onramp;

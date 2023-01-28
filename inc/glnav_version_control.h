@@ -79,6 +79,12 @@ namespace glnav
         const version_t expected;
         const version_t actual;
     };
+
+    void assert_version(const version_controlled &version1, const version_controlled &version2)
+    {
+        if(!version1.versions_synchronized(version2))
+            throw version_mismatch(version1, version2);
+    }
 }
 
 #endif
