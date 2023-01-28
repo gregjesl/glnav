@@ -92,35 +92,8 @@ namespace glnav
             return this->dot(*this);
         }
 
-        float magnitudef() const
-        {
-            return sqrtf((float)this->magnitude_squared());
-        }
-
-        double magnitude() const
-        {
-            return sqrt((double)this->magnitude_squared());
-        }
-
-        long double magnitudel() const
-        {
-            return sqrtl((long double)this->magnitude_squared());
-        }
-
-        float anglef() const
-        {
-            return atan2f(this->y, this->x);
-        }
-
-        double angle() const
-        {
-            return atan2(this->y, this->x);
-        }
-
-        long double anglel() const
-        {
-            return atan2l(this->y, this->x);
-        }
+        template<typename Q> 
+        Q magnitude() const;
 
         /*! \brief Determiens if a point lies within the concave section defined by two legs
          *
@@ -158,6 +131,19 @@ namespace glnav
             (void)around;
         }
     };
+
+    template<typename T, typename Q>
+    Q angle(const point<T> &input)
+    {
+        return atan2((Q)input.y, (Q)input.x);
+    }
+
+    template<typename T> 
+    template<typename Q>
+    Q point<T>::magnitude() const
+    {
+        return sqrt((Q)this->magnitude_squared());
+    }
 
     template<typename T>
     class point_group : public std::vector<point<T> >

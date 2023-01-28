@@ -92,7 +92,8 @@ namespace glnav
 
                 // Set the speed
                 const Q delta_cost = this->__map.cost(result.back().first) - this->__map.cost(next);
-                const Q distance = path<T>(result.back().first, next).length();
+                const path<T> next_path = path<T>(result.back().first, next);
+                const Q distance = glnav::length<T, Q>(next_path);
                 result.back().second = distance / delta_cost;
 
                 // Set the new waypoint

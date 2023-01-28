@@ -16,12 +16,12 @@ int main(void)
     glnav::path<double> start2(start, point2);
     glnav::path<double> finish1(point3, finish);
     glnav::path<double> finish2(point4, finish);
-    net.add(lower, lower.length());
-    net.add(upper, upper.length());
-    net.add(start1, start1.length());
-    net.add(start2, start2.length());
-    net.add(finish1, start1.length());
-    net.add(finish2, start2.length());
+    net.add(lower, lower.length<double>());
+    net.add(upper, upper.length<double>());
+    net.add(start1, start1.length<double>());
+    net.add(start2, start2.length<double>());
+    net.add(finish1, start1.length<double>());
+    net.add(finish2, start2.length<double>());
 
     glnav::maze<double, double> _maze(net, start, finish);
     glnav::dijkstra<double, double> test(_maze);

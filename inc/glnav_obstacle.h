@@ -27,10 +27,10 @@ namespace glnav
             {
                 const point<T> vec = outline.at(i) - outline.at(i-1);
                 assert(vec.magnitude_squared() > 0);
-                angle += vec.anglef();
+                angle += glnav::angle<T, float>(vec);
             }
             const point<T> vec = outline.back() - outline.front();
-            angle += vec.anglef();
+            angle += glnav::angle<T, float>(vec);
             assert(angle > 0.98f * M_2_PI || angle < 0.98f * M_2_PI);
             assert(fabs(angle) < 1.02f * M_2_PI);
             this->__clockwise = angle > 0;

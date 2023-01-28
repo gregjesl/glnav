@@ -164,13 +164,8 @@ namespace glnav
             assert(current_center == other_center);
             assert(!this->is_point() && !other.is_point());
 
-            // Prefer flatter
-            float current_angle = this->as_vector().anglef();
-            if(current_angle < 0.0f) current_angle += M_PI;
-            float other_angle = other.as_vector().anglef();
-            if(other_angle < 0.0f) other_angle += M_PI;
-            assert(current_angle != other_angle);
-            return current_angle < other_angle;
+            // Use the starting point
+            return this->start < other.start;
         }
 
         bool is_point() const
@@ -188,24 +183,12 @@ namespace glnav
             return this->as_vector().magnitude_squared();
         }
 
-        float lengthf() const
-        {
-            return this->as_vector().magnitudef();
-        }
-
-        double length() const
-        {
-            return this->as_vector().magnitude();
-        }
-
-        long double lengthl() const
-        {
-            return this->as_vector().magnitudel();
-        }
+        template<typename Q>
+        Q length() const;
 
         virtual double cost() const
         {
-            return this->length();
+            return this->length<double>();
         }
 
         /*! \brief Checks connection to another path 
@@ -338,6 +321,19 @@ namespace glnav
             return true;
         }
     };
+
+    template<typename T>
+    template<typename Q>
+    Q path<T>::length() const
+    {
+        return sqrt((Q)this->as_vector().magnitude_squared());
+    }
+
+    template<typename T, typename Q>
+    Q length(const path<T> &input)
+    {
+        return sqrt((Q)input.as_vector().magnitude_squared());
+    }
 }
 
 #endif
