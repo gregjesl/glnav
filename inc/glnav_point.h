@@ -138,11 +138,17 @@ namespace glnav
         return atan2((Q)input.y, (Q)input.x);
     }
 
+    template<typename T, typename Q>
+    Q magnitude(const point<T> &input)
+    {
+        return sqrt((Q)input.magnitude_squared());
+    }
+
     template<typename T> 
     template<typename Q>
     Q point<T>::magnitude() const
     {
-        return sqrt((Q)this->magnitude_squared());
+        return glnav::magnitude<T, Q>(*this);
     }
 
     template<typename T>
