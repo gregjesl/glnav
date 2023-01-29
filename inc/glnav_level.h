@@ -1,54 +1,138 @@
 #ifndef GLNAV_LEVEL_H
 #define GLNAV_LEVEL_H
 
-#include "glnav_point.h"
-#include "glnav_obstacle_interface.h"
-#include "glnav_obstruction_wrapper.h"
+#include "glnav_traveler.h"
+#include "glnav_obstacle.h"
+#include "glnav_network.h"
 #include <set>
+#include <map>
 
 namespace glnav
 {
     template<typename T>
+    class dynamic_set
+    {
+    public:
+        typedef enum action_enum
+        {
+            ADD,
+            REMOVE
+        } action_t;
+
+        void add(T value)
+        {
+            typename std::map<T, action_t>::iterator it = this->__changes.find(value);
+            if(it != this->__changes.end())
+            {
+                it->second = ADD;
+                return;
+            }
+            this->__changes.insert(
+                std::pair<T, action_t>(value, ADD)
+            );
+        }
+
+        void remove(T value)
+        {
+            typename std::map<T, action_t>::iterator it = this->__changes.find(value);
+            if(it != this->__changes.end())
+            {
+                it->second = REMOVE;
+                return;
+            }
+            this->__changes.insert(
+                std::pair<T, action_t>(value, REMOVE)
+            );
+        }
+
+        bool synchronize()
+        {
+            if(this->__changes.empty()) return false;
+
+            while(!this->__changes.empty())
+            {
+                typename std::map<T, action_t>::iterator it = this->__changes.begin();
+                switch (it->second)
+                {
+                case ADD:
+                    this->values.insert(it->first);
+                    break;
+                case REMOVE:
+                    this->values.erase(it->first);
+                }
+                this->__changes.erase(it);
+            }
+            return true;
+        }
+
+        size_t pending_changes() const { return this->__changes.size(); }
+
+        std::set<T> values;
+    private:
+        std::map<T, action_t> __changes;
+    };
+
+    template<typename T, typename Q>
     class level
     {
     public:
-        void add(const obstacle_interface<T> *input)
+        level()
+        { }
+
+        void attach(travler<T, Q> &tvlr)
         {
-            this->__obstacles.insert(input);
+            this->__travelers.add(tvlr);
         }
 
-        void remove(const obstacle_interface<T> *input)
+        void detatch(travler<T, Q> &tvlr)
         {
-            this->__obstacles.erase(input);
+            this->__travelers.remove(tvlr);
         }
 
-        void navigate(const point<T> &from, const point<T> &to)
+        void run(const Q duration)
         {
-            (void)from;
-            (void)to;
-            // Step 1: Find all potential obstacles
+            this->__travelers.synchronize();
+            assert(this->__travelers.pending_changes() == 0);
 
-            // Step 2: Build the network
-
-            // Step 3: Translate the network such that the goal is to navigate to (0,0)
-
-            // Step 4: A*
-        }
-    private:
-        typedef std::set<obstacle_interface *> obstacle_set_t;
-        obstacle_set_t __obstacles;
-
-        obstacle_set_t __load(const T x1, const T y1, const T x2, const T y2)
-        {
-            cartesian_area<T> area(x1, y1, x2, y2);
-            obstacle_set_t result;
-            for(obstacle_set_t::const_interator it = this->__obstacles.begin(); it != this->__obstacles.end(); ++it)
+            if(this->__obstacles.synchronize())
             {
-                if(area.could_overlap(**it)) {
-                    result.insert(*it);
-                }
+                // The network has changed
+                this->__rebuild_level();
             }
-            return result;
+
+            // Move travelers
+            this->__propogate_travelers(duration);
+        }
+
+    private:
+        dynamic_set<obstacle<T, Q> *> __obstacles;
+        dynamic_set<traveler<T, Q> *> __travelers;
+        network<T, Q> __net;
+
+        void __rebuild_level()
+        {
+            // Rebuild the network
+
+            // Update all the travelers
+            typename std::set<traveler<T, Q> *>::iterator it;
+            for(it = this->__travelers.values.begin(); it != this->__travelers.values.end(); ++it)
+                this->__remap_traveler(*it);
+        }
+
+        void __remap_traveler(traveler<T, Q> * tvlr)
+        {
+
+        }
+
+        void __propogate_travelers(const Q duration)
+        {
+            if(this->__travelers.values.empty()) return;
+
+            typename std::set<traveler<T, Q> *>::iterator it;
+            for(it = this->__travelers.values.begin(); it != this->__travelers.values.end(); ++it)
+            {
+                it->travel(duration);
+            }
         }
     };
 }
