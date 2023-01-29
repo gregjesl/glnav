@@ -11,5 +11,7 @@ else()
     add_compile_options(-Wall -Wextra -Werror)
 endif()
 
+include_directories(lib)
+
 enable_testing()
 add_subdirectory (test)

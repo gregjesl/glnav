@@ -1,0 +1,3 @@
+[submodule "lib/con3"]
+	path = lib/con3
+	url = https://gist.github.com/d105b17afcb2158c773f77abde7b3b1a.git

@@ -9,69 +9,6 @@
 
 namespace glnav
 {
-    template<typename T>
-    class dynamic_set
-    {
-    public:
-        typedef enum action_enum
-        {
-            ADD,
-            REMOVE
-        } action_t;
-
-        void add(T value)
-        {
-            typename std::map<T, action_t>::iterator it = this->__changes.find(value);
-            if(it != this->__changes.end())
-            {
-                it->second = ADD;
-                return;
-            }
-            this->__changes.insert(
-                std::pair<T, action_t>(value, ADD)
-            );
-        }
-
-        void remove(T value)
-        {
-            typename std::map<T, action_t>::iterator it = this->__changes.find(value);
-            if(it != this->__changes.end())
-            {
-                it->second = REMOVE;
-                return;
-            }
-            this->__changes.insert(
-                std::pair<T, action_t>(value, REMOVE)
-            );
-        }
-
-        bool synchronize()
-        {
-            if(this->__changes.empty()) return false;
-
-            while(!this->__changes.empty())
-            {
-                typename std::map<T, action_t>::iterator it = this->__changes.begin();
-                switch (it->second)
-                {
-                case ADD:
-                    this->values.insert(it->first);
-                    break;
-                case REMOVE:
-                    this->values.erase(it->first);
-                }
-                this->__changes.erase(it);
-            }
-            return true;
-        }
-
-        size_t pending_changes() const { return this->__changes.size(); }
-
-        std::set<T> values;
-    private:
-        std::map<T, action_t> __changes;
-    };
-
     template<typename T, typename Q>
     class level
     {
@@ -91,13 +28,19 @@ namespace glnav
 
         void run(const Q duration)
         {
-            this->__travelers.synchronize();
-            assert(this->__travelers.pending_changes() == 0);
+            // Purge travelers
+            this->__travelers.purge();
 
             if(this->__obstacles.synchronize())
             {
                 // The network has changed
                 this->__rebuild_level();
+            }
+
+            // Merge in travelers
+            if(this->__travelers.merge())
+            {
+
             }
 
             // Move travelers
