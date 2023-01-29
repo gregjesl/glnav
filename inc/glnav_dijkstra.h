@@ -66,7 +66,7 @@ namespace glnav
 
         route<T, Q> build_route() const
         {
-            route<T, Q> result(this->__maze.network());            
+            route<T, Q> result;            
             if(!this->is_solved()) return result;
 
             point<T> current = this->__maze.start();
@@ -97,7 +97,7 @@ namespace glnav
                 const Q distance = glnav::length<T, Q>(next_path);
 
                 // Set the new waypoint
-                result.push_back(next, distance / delta_cost);
+                result.push_back(heading<T, Q>(next, distance / delta_cost));
                 
                 // Move the points
                 current = next;

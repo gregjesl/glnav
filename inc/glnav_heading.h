@@ -9,12 +9,16 @@ namespace glnav
     class travel_result
     {
     public:
+        point<T> target;
         point<T> location;
         Q elapsed_time;
         Q unused_time;
         Q time_to_waypoint;
 
-        bool target_reached() const { return this->time_to_waypoint == 0; }
+        bool target_reached() const
+        {
+            return this->target == this->location; 
+        }
     };
 
     template<typename T, typename Q>
@@ -33,6 +37,7 @@ namespace glnav
         {
             // Initialize result
             travel_result<T, Q> result;
+            result.target = this->target;
 
             // Check for on location
             if(location == this->target) {
@@ -52,6 +57,15 @@ namespace glnav
             // Get the time to target
             if(this->speed <= 0) throw std::domain_error("Speed must be greater than zero");
             const Q time_to_waypoint = distance / this->speed;
+
+            // Check for no duration
+            if(duration == 0) {
+                result.location = location;
+                result.elapsed_time = 0;
+                result.unused_time = 0;
+                result.time_to_waypoint = time_to_waypoint;
+                return result;
+            }
 
             if(duration < time_to_waypoint)
             {
