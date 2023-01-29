@@ -12,9 +12,9 @@ namespace glnav
         point<T> location;
         Q elapsed_time;
         Q unused_time;
-        Q time_to_target;
+        Q time_to_waypoint;
 
-        bool target_reached() const { return this->time_to_target == 0; }
+        bool target_reached() const { return this->time_to_waypoint == 0; }
     };
 
     template<typename T, typename Q>
@@ -39,7 +39,7 @@ namespace glnav
                 result.location = location;
                 result.elapsed_time = 0;
                 result.unused_time = duration;
-                result.time_to_target = 0;
+                result.time_to_waypoint = 0;
                 return result;
             }
 
@@ -51,9 +51,9 @@ namespace glnav
 
             // Get the time to target
             if(this->speed <= 0) throw std::domain_error("Speed must be greater than zero");
-            const Q time_to_target = distance / this->speed;
+            const Q time_to_waypoint = distance / this->speed;
 
-            if(duration < time_to_target)
+            if(duration < time_to_waypoint)
             {
                 assert(distance > 0);
                 const Q traveled = this->speed * duration;
@@ -61,15 +61,15 @@ namespace glnav
                 result.location = point<T>(location.x + (unit.x * traveled), location.y + (unit.y * traveled));
                 result.elapsed_time = duration;
                 result.unused_time = 0;
-                result.time_to_target = time_to_target - duration;
+                result.time_to_waypoint = time_to_waypoint - duration;
                 return result;
             }
 
-            assert(duration >= time_to_target);
+            assert(duration >= time_to_waypoint);
             result.location = this->target;
-            result.elapsed_time = time_to_target;
-            result.unused_time = duration - time_to_target;
-            result.time_to_target = 0;
+            result.elapsed_time = time_to_waypoint;
+            result.unused_time = duration - time_to_waypoint;
+            result.time_to_waypoint = 0;
             return result;
         }
     };
