@@ -66,7 +66,7 @@ namespace glnav
 
         route<T, Q> build_route() const
         {
-            route<T, Q> result;            
+            route<T, Q> result(this->__maze.start());
             if(!this->is_solved()) return result;
 
             point<T> current = this->__maze.start();
