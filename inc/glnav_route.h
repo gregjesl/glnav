@@ -13,37 +13,39 @@ namespace glnav
     class route : public std::deque<heading<T, Q> >
     {
     public:
-        route(const point<T> &start)
-            : std::deque<heading<T, Q> >(),
-            __location(start)
+        route()
+            : std::deque<heading<T, Q> >()
         { }
 
-        travel_result<T, Q> follow(const Q duration)
-        {
-            travel_result<T, Q> result;
-            if(this->empty())
-            {
-                result.target = this->__location;
-                result.time_to_waypoint = 0;
-                result.location = this->__location;
-                result.elapsed_time = 0;
-                result.unused_time = duration;
-                return result;
-            }
+        route(const route<T, Q> & other)
+            : std::deque<heading<T, Q> >(other)
+        { }
 
-            result = this->front().approach(this->__location, duration);
-            this->__location = result.location;
+        route& operator=(const route<T, Q> & other)
+        {
+            std::deque<heading<T, Q> >::operator=(other);
+            return *this;
+        }
+
+        travel_result<T, Q> follow(const point<T> & start, const Q duration)
+        {
+            if(this->empty())
+                return travel_result<T, Q>::idle(start, duration);
+            
+            travel_result<T, Q> result = this->front().approach(start, duration);
             if(result.target_reached())
             {
+                const point<T> next = result.location;
+                const Q elapsed_time = result.elapsed_time;
                 this->pop_front();
-                result = this->follow(result.unused_time);
+                if(!this->empty())
+                {
+                    result = this->follow(next, result.unused_time);
+                    result.elapsed_time += elapsed_time;
+                }
             }
             return result;
         }
-
-        const point<T> & location() const { return this->__location; }
-    private:
-        point<T> __location;
     };
 }
 

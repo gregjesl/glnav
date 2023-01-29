@@ -19,6 +19,17 @@ namespace glnav
         {
             return this->target == this->location; 
         }
+
+        static travel_result<T, Q> idle(const point<T> & at, const Q duration)
+        {
+            travel_result<T, Q> result;
+            result.target = at;
+            result.location = at;
+            result.elapsed_time = duration;
+            result.unused_time = 0;
+            result.time_to_waypoint = 0;
+            return result;
+        }
     };
 
     template<typename T, typename Q>
