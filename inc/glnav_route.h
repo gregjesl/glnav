@@ -27,6 +27,12 @@ namespace glnav
             return *this;
         }
 
+        const point<T> & target() const 
+        { 
+            if(this->empty()) throw std::domain_error("No target set");
+            return this->back().target; 
+        }
+
         travel_result<T, Q> follow(const point<T> & start, const Q duration)
         {
             if(this->empty())

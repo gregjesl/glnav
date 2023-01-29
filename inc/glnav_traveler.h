@@ -37,6 +37,7 @@ namespace glnav
         }
 
         const point<T> & location() const { return this->__location; }
+        const point<T> & target() const { return this->is_moving() ? this->__route.target() : this->__location; }
 
         bool is_moving() const { return !this->__route.empty(); }
 

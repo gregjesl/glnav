@@ -9,6 +9,7 @@ int main(void)
     glnav::route<double, double> rte;
     rte.push_back(glnav::heading<double, double>(midpoint, 1));
     rte.push_back(glnav::heading<double, double>(target, 1));
+    TEST_TRUE(rte.target() == target);
 
     glnav::traveler<double, double> test(start, rte);
 
