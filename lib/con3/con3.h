@@ -216,11 +216,11 @@ namespace con3
         /*! \brief Accesses a specific index in the set 
          *
          * This operator is useful for iterating over the set in a for loop
-         * \note This method is O(n) complexity since the set must be iterated through
+         * \note This method is O(1) complexity if index increases on each subsequent call
          */
         const T & at(const size_t index)
         {
-            if(this->__values.size() <= index) throw std::domain_error("Index exceeds set size");
+            if(index >= this->__values.size()) throw std::domain_error("Index exceeds set size");
 
             if(this->__cached_index < index)
             {
