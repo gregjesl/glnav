@@ -12,6 +12,7 @@
 #include "inc/glnav_maze.h"
 #include "inc/glnav_heading.h"
 #include "inc/glnav_traveler.h"
+#include "inc/glnav_dispatch.h"
 #include "inc/glnav_dijkstra.h"
 // #include "inc/glnav_astar.h"
 
