@@ -5,6 +5,7 @@
 #include "glnav_edge.h"
 #include "glnav_version_control.h"
 #include "glnav_neighbor.h"
+#include "glnav_map.h"
 #include <assert.h>
 #include <map>
 #include <inttypes.h>
@@ -105,6 +106,32 @@ namespace glnav
         using network_base_t::size;
         using network_base_t::empty;
         using network_base_t::contains;
+
+        network<T, Q> & from_map(map<T> &seed, const point<T> &start, const point<T> &finish)
+        {
+            if(start == finish) throw std::invalid_argument("Starting point is the same as the finishing point");
+            std::set<point<T> > nodes;
+            std::set<obstacle<T> *> obstacles;
+            nodes.insert(start);
+            nodes.insert(finish);
+            size_t num_nodes = 0;
+            while(num_nodes != nodes.size())
+            {
+                num_nodes = nodes.size();
+                obstacles = seed.obstacles(nodes);
+                nodes = corners(obstacles);
+                nodes.insert(start);
+                nodes.insert(finish);
+            }
+
+            std::vector<path<T> > paths = seed.paths(nodes);
+            this->clear();
+            for(size_t i = 0; i < paths.size(); i++)
+            {
+                this->add(paths.at(i), paths.at(i).cost());
+            }
+            this->update_version();
+        }
 
         /*
         double cost(const point<T> &from, const point<T> &to) const
