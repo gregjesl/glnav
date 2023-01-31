@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <stdexcept>
 #include <list>
+#include <set>
 
 namespace glnav
 {
@@ -30,6 +31,27 @@ namespace glnav
             : start(other.start),
             end(other.end)
         { }
+
+        virtual ~path() { }
+
+        static std::vector<path<T> > generate(const std::set<point<T> > &input)
+        {
+            std::vector<path<T> > result;
+            const size_t n = input.size();
+            const size_t permutations = (n * (n - 1)) / 2;
+            result.reserve(permutations); // https://byjus.com/question-answer/what-is-the-sum-of-1-2-3-n/
+            typename std::set<point<T> >::const_iterator lower, upper;
+            for(lower = input.begin(); lower != input.end(); ++lower)
+            {
+                for(upper = lower; upper != input.end(); ++upper)
+                {
+                    if(*lower == *upper) continue;
+                    result.push_back(path<T>(*lower, *upper));
+                }
+            }
+            assert(result.size() == permutations);
+            return result;
+        }
 
         path& operator=(const path &other)
         {

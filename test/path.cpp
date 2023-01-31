@@ -92,4 +92,17 @@ int main(void)
             glnav::path<int>(0, 2, 0, 0)
         );
     }
+
+    // Generation
+    {
+        std::set<glnav::point<int> > input;
+        input.insert(glnav::point<int>(0, 1));
+        input.insert(glnav::point<int>(-1, -1));
+        input.insert(glnav::point<int>(1, -1));
+        const std::vector<glnav::path<int> > paths = glnav::path<int>::generate(input);
+        TEST_EQUAL(paths.size(), 3);
+        TEST_CONTAINS(paths, glnav::path<int>(glnav::point<int>(0, 1), glnav::point<int>(-1, -1)));
+        TEST_CONTAINS(paths, glnav::path<int>(glnav::point<int>(1, -1), glnav::point<int>(-1, -1)));
+        TEST_CONTAINS(paths, glnav::path<int>(glnav::point<int>(0, 1), glnav::point<int>(1, -1)));
+    }
 }
