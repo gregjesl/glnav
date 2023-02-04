@@ -15,3 +15,4 @@ include_directories(lib)
 
 enable_testing()
 add_subdirectory (test)
+add_subdirectory (demo)

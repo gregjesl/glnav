@@ -5,6 +5,7 @@
 #include "glnav_obstacle_interface.h"
 #include "glnav_point.h"
 #include <vector>
+#include <string>
 
 namespace glnav
 {
@@ -31,8 +32,8 @@ namespace glnav
             }
             const point<T> vec = outline.back() - outline.front();
             angle += glnav::angle<T, float>(vec);
-            assert(angle > 0.98f * M_2_PI || angle < 0.98f * M_2_PI);
-            assert(fabs(angle) < 1.02f * M_2_PI);
+            assert(angle > 0.98f * M_PI * 2 || angle < 0.98f * M_PI * 2);
+            assert(fabs(angle) < 1.02f * M_PI * 2);
             this->__clockwise = angle > 0;
 
             for(size_t i = 1; i < outline.size(); i++)
@@ -65,14 +66,14 @@ namespace glnav
             return obstacle(outline);
         }
 
-        static obstacle regular_polygon(const point<T> &center, const T radius, const T rotation, const size_t num_points)
+        static obstacle regular_polygon(const point<T> &center, const T radius, const double rotation, const size_t num_points)
         {
             if(num_points < 3) throw std::invalid_argument("Polygon must have at least three sides");
-            if(num_points == 4 && rotation == M_PI_4) return square(center, radius * 2);
             std::vector<point<T> > outline;
             for(size_t i = 0; i < num_points; i++)
             {
-                const double angle = M_2_PI * ((double)i / (double)num_points);
+                const double ratio = ((double)i) / ((double)num_points);
+                const double angle = M_PI * 2 * ratio + rotation;
                 outline.push_back(center + point<T>(radius * cos(angle), radius * sin(angle)));
             }
             return obstacle(outline);
@@ -117,9 +118,12 @@ namespace glnav
             std::string result = "<polygon points=\"";
             for(size_t i = 0; i < this->__corners.size(); i++)
             {
-                result << this->__corners.at(i).x + "," + this->__corners.at(i).y + " ";
+                result += std::to_string(this->__corners.at(i).x);
+                result.push_back(',');
+                result += std::to_string(this->__corners.at(i).y);
+                result.push_back(' ');
             }
-            result += "\"/>";
+            result += "\"/>\n";
             return result;
         }
 
