@@ -22,4 +22,15 @@ int main(void)
     TEST_TRUE(corners.find(glnav::point<int>(-1, 3)) != corners.end());
     TEST_TRUE(corners.find(glnav::point<int>(3, -1)) != corners.end());
     TEST_TRUE(corners.find(glnav::point<int>(3, 3)) != corners.end());
+
+    glnav::cartesian_area<int> area(glnav::point<int>(0, 0));
+    area.expand(glnav::point<int>(-2, -2));
+    glnav::map<int> local = test.localize(area);
+    TEST_EQUAL(local.values().size(), 1);
+    TEST_EQUAL(*local.values().begin(), &test_obs);
+
+    area = glnav::cartesian_area<int>(glnav::point<int>(-2, -2));
+    area.expand(glnav::point<int>(-4, -4));
+    local = test.localize(area);
+    TEST_EQUAL(local.values().size(), 0);
 }

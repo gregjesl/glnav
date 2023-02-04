@@ -103,8 +103,8 @@ namespace glnav
     class cartesian_area : virtual public cartesian_object<T>
     {
     public:
-        cartesian_area()
-            : __minX(0), __minY(0), __maxX(0), __maxY(0)
+        cartesian_area(const point<T> &seed)
+            : __minX(seed.x), __minY(seed.y), __maxX(seed.x), __maxY(seed.y)
         { }
 
         cartesian_area(const T x1, const T y1, const T x2, const T y2)
@@ -113,6 +113,18 @@ namespace glnav
             __maxX(x1 > x2 ? x1 : x2),
             __maxY(y1 > y2 ? y1 : y2)
         { }
+
+        cartesian_area(const cartesian_object<T> &other)
+            : __minX(other.minX()),
+            __minY(other.minY()),
+            __maxX(other.maxX()),
+            __maxY(other.maxY())
+        { 
+            assert(this->minX() <= this->maxX());
+            assert(this->minY() <= this->maxY());
+            assert(other.minX() <= other.maxX());
+            assert(other.minY() <= other.maxY());
+        }
 
         static cartesian_area<T> from_set(const std::set<point<T> > & input)
         {
@@ -137,18 +149,6 @@ namespace glnav
             else if(input.y > this->__maxY)
                 this->__maxY = input.y;
         }
-        
-        cartesian_area(const cartesian_object<T> &other)
-            : __minX(other.minX()),
-            __minY(other.minY()),
-            __maxX(other.maxX()),
-            __maxY(other.maxY())
-        { 
-            assert(this->minX() <= this->maxX());
-            assert(this->minY() <= this->maxY());
-            assert(other.minX() <= other.maxX());
-            assert(other.minY() <= other.maxY());
-        }
 
         cartesian_area& operator= (const cartesian_object<T> &other)
         {
@@ -166,10 +166,10 @@ namespace glnav
         virtual T minY() const { return this->__minY; }
         virtual T maxY() const { return this->__maxY; }
     private:
-        const T __minX;
-        const T __minY;
-        const T __maxX;
-        const T __maxY;
+        T __minX;
+        T __minY;
+        T __maxX;
+        T __maxY;
     };
 }
 

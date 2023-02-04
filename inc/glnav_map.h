@@ -29,6 +29,10 @@ namespace glnav
             : con3::set<obstacle<T> *>()
         { }
 
+        map(const std::set<obstacle<T> *> &seed)
+            : con3::set<obstacle<T> *>(seed)
+        { }
+
         /*! \brief Finds an obstruction to a path 
          *
          * \returns A pointer to the first obstruction in the set that obstructs the path. `nullptr` is returned if no obstruction is found that obstructs the path. 
@@ -103,6 +107,18 @@ namespace glnav
                 }
             }
             return result;
+        }
+
+        map<T> localize(const cartesian_object<T> &area) const
+        {
+            std::set<obstacle<T> * > result;
+            typename std::set<obstacle<T> *>::const_iterator it;
+            for(it = this->values().begin(); it != this->values().end(); ++it)
+            {
+                if((*it)->could_overlap(area, true))
+                    result.insert(*it);
+            }
+            return map<T>(result);
         }
     };
 }

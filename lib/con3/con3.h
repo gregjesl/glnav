@@ -29,6 +29,12 @@ namespace con3
             this->__reset_cache();
         }
 
+        set(const std::set<T> &other)
+            : __values(other)
+        {
+            this->__reset_cache();
+        }
+
         /*! \brief Copy constructor */
         set(const set &other) 
             : __changes(other.__changes),
