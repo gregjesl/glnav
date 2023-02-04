@@ -65,6 +65,19 @@ namespace glnav
             return obstacle(outline);
         }
 
+        static obstacle regular_polygon(const point<T> &center, const T radius, const T rotation, const size_t num_points)
+        {
+            if(num_points < 3) throw std::invalid_argument("Polygon must have at least three sides");
+            if(num_points == 4 && rotation == M_PI_4) return square(center, radius * 2);
+            std::vector<point<T> > outline;
+            for(size_t i = 0; i < num_points; i++)
+            {
+                const double angle = M_2_PI * ((double)i / (double)num_points);
+                outline.push_back(center + point<T>(radius * cos(angle), radius * sin(angle)));
+            }
+            return obstacle(outline);
+        }
+
         virtual bool obstructs(const path<T> &input) const
         {
             // Fast exclude
@@ -98,6 +111,17 @@ namespace glnav
         virtual T maxX() const { return this->__maxX; }
         virtual T minY() const { return this->__minY; }
         virtual T maxY() const { return this->__maxY; }
+
+        std::string svg() const
+        {
+            std::string result = "<polygon points=\"";
+            for(size_t i = 0; i < this->__corners.size(); i++)
+            {
+                result << this->__corners.at(i).x + "," + this->__corners.at(i).y + " ";
+            }
+            result += "\"/>";
+            return result;
+        }
 
     private:
         std::vector<point<T> > __corners;
