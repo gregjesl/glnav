@@ -2,6 +2,7 @@
 #define GLNAV_CARTESIAN_H
 
 #include "glnav_point.h"
+#include <set>
 #include <assert.h>
 
 namespace glnav
@@ -112,6 +113,30 @@ namespace glnav
             __maxX(x1 > x2 ? x1 : x2),
             __maxY(y1 > y2 ? y1 : y2)
         { }
+
+        static cartesian_area<T> from_set(const std::set<point<T> > & input)
+        {
+            cartesian_area<T> result;
+            typename std::set<point<T> >::const_iterator it;
+            for(it = input.begin(); it != input.end(); it++)
+            {
+                result.expand(*it);
+            }
+            return result;
+        }
+
+        void expand(const point<T> &input)
+        {
+            if(input.x < this->__minX)
+                this->__minX = input.x;
+            else if(input.x > this->__maxX)
+                this->__maxX = input.x;
+
+            if(input.y < this->__minY)
+                this->__minY = input.y;
+            else if(input.y > this->__maxY)
+                this->__maxY = input.y;
+        }
         
         cartesian_area(const cartesian_object<T> &other)
             : __minX(other.minX()),
