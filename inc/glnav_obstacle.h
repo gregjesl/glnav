@@ -10,15 +10,12 @@
 namespace glnav
 {
     template<typename T>
-    class obstacle : virtual public obstacle_interface<T>
+    class obstacle : public cartesian_area<T>, virtual public obstacle_interface<T>
     {
     public:
         obstacle(const std::vector<point<T> > &outline)
-            : __corners(outline),
-            __minX(outline.front().x),
-            __minY(outline.front().y),
-            __maxX(outline.front().x),
-            __maxY(outline.front().y)
+            : cartesian_area<T>(outline.front()),
+            __corners(outline)
         {
             if(outline.size() < 3) throw std::invalid_argument("Insufficent points");
             if(point_group<T>(outline).size() < outline.size()) throw std::invalid_argument("Duplicate points");
@@ -38,18 +35,19 @@ namespace glnav
 
             for(size_t i = 1; i < outline.size(); i++)
             {
-                this->__update_axis(outline.at(i).x, this->__minX, this->__maxX);
-                this->__update_axis(outline.at(i).y, this->__minY, this->__maxY);
+                this->expand(outline.at(i));
             }
         }
 
         obstacle(const obstacle &other)
-            : __corners(other.__corners),
+            : cartesian_area<T>(other),
+            __corners(other.__corners),
             __clockwise(other.__clockwise)
         { }
 
         obstacle& operator=(const obstacle &other)
         {
+            cartesian_area<T>::operator=(other);
             this->__corners = other.__corners;
             this->__clockwise = other.__clockwise;
             return this;
@@ -124,11 +122,6 @@ namespace glnav
             return result;
         }
 
-        virtual T minX() const { return this->__minX; }
-        virtual T maxX() const { return this->__maxX; }
-        virtual T minY() const { return this->__minY; }
-        virtual T maxY() const { return this->__maxY; }
-
         std::string svg() const
         {
             std::string result = "<polygon points=\"";
@@ -146,10 +139,6 @@ namespace glnav
     private:
         std::vector<point<T> > __corners;
         bool __clockwise;
-        T __minX;
-        T __minY;
-        T __maxX;
-        T __maxY;
 
         bool __corner_obstructs(const path<T> &input, const size_t index) const
         {
@@ -191,22 +180,6 @@ namespace glnav
                 if(this->__side_obstructs(input, i)) return true;
             }
             return false;
-        }
-
-        void __update_min(const T input, T &value)
-        {
-            if(input < value) value = input;
-        }
-
-        void __update_max(const T input, T &value)
-        {
-            if(input > value) value = input;
-        }
-
-        void __update_axis(const T value, T &min, T &max)
-        {
-            this->__update_min(value, min);
-            this->__update_max(value, max);
         }
     };
 }

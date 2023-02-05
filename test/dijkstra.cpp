@@ -3,13 +3,13 @@
 
 int main(void)
 {
-    glnav::network<double, double> net;
     const glnav::point<double> point1(0, -2);
     const glnav::point<double> point2(0, 1);
     const glnav::point<double> point3(2, -3);
     const glnav::point<double> point4(2, 2);
     const glnav::point<double> start(-2, 0);
     const glnav::point<double> finish(4, 0);
+    glnav::maze<double, double> net(start, finish);
     glnav::path<double> lower(point1, point3);
     glnav::path<double> upper(point2, point4);
     glnav::path<double> start1(start, point1);
@@ -23,8 +23,7 @@ int main(void)
     net.add(finish1, start1.length<double>());
     net.add(finish2, start2.length<double>());
 
-    glnav::maze<double, double> _maze(net, start, finish);
-    glnav::dijkstra<double, double> test(_maze);
+    glnav::dijkstra<double, double> test(net);
     TEST_FALSE(test.is_solved());
 
     const size_t max_iterations = 100;

@@ -18,7 +18,7 @@ namespace glnav
         dijkstra(const maze<T, Q> &input)
             : version_dependent(input), 
             __maze(input),
-            __map(input.seed_map())
+            __map(input)
         { 
             this->__to_go.insert(input.finish());
             this->__map.set(this->__maze.finish(), 0);
