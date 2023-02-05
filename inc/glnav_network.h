@@ -154,6 +154,12 @@ namespace glnav
             return it->second;
         }
 
+        bool contains(const path<T> &input) const
+        {
+            if(!this->contains(input.start) || !this->contains(input.end)) return false;
+            return this->neighbors(input.start).contains(input.end);
+        }
+
         std::map<point<T>, Q> node_map(const Q seed) const
         {
             std::map<point<T> , Q> result;

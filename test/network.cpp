@@ -17,6 +17,7 @@ int main(void)
     TEST_EQUAL(test.size(), 2);
     TEST_TRUE(test.contains(start));
     TEST_TRUE(test.contains(end));
+    TEST_TRUE(test.contains(test_path));
     TEST_FALSE(test.contains(glnav::point<int>(5, 6)));
     TEST_EQUAL(test.neighbors(start).size(), 1);
     TEST_TRUE(test.neighbors(start).at(0).location() == end);
@@ -45,6 +46,9 @@ int main(void)
     TEST_EQUAL(test.neighbors(other).size(), 2);
     test.remove(other);
     TEST_EQUAL(test.version(), 4);
+    TEST_FALSE(test.contains(other));
+    TEST_FALSE(test.contains(test_path2));
+    TEST_FALSE(test.contains(test_path3));
     TEST_EQUAL(test.neighbors(start).size(), 1);
     TEST_TRUE(test.neighbors(start).at(0).location() == end);
     TEST_TRUE(test.neighbors(end).at(0).location() == start);
