@@ -66,6 +66,22 @@ namespace glnav
             return obstacle(outline);
         }
 
+        static obstacle rectangle(const cartesian_object<T> &diagonal)
+        {
+            std::vector<point<T> > outline;
+            outline.push_back(point<T>(diagonal.minX(), diagonal.minY()));
+            outline.push_back(point<T>(diagonal.maxX(), diagonal.minY()));
+            outline.push_back(point<T>(diagonal.maxX(), diagonal.maxY()));
+            outline.push_back(point<T>(diagonal.minX(), diagonal.maxY()));
+            return obstacle(outline);
+        }
+
+        static obstacle rectangle(const point<T> &corner1, const point<T> corner2)
+        {
+            const path<T> diagonal(corner1, corner2);
+            return rectangle(diagonal);
+        }
+
         static obstacle regular_polygon(const point<T> &center, const T radius, const double rotation, const size_t num_points)
         {
             if(num_points < 3) throw std::invalid_argument("Polygon must have at least three sides");
