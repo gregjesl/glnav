@@ -34,6 +34,7 @@ namespace glnav
 
         virtual ~path() { }
 
+        /*! \brief Generates all possible paths between points */
         static std::vector<path<T> > generate(const std::set<point<T> > &input)
         {
             std::vector<path<T> > result;
