@@ -1,20 +1,18 @@
 #ifndef GLNAV_ASTAR_H
 #define GLNAV_ASTAR_H
 
-#include "glnav_network.h"
+#include "glnav_maze.h"
+#include "glnav_route.h"
 #include <algorithm>
 
 namespace glnav
 {
-    template<typename T>
+    template<typename T, typename Q>
     class astar
     {
     public:
-        astar(network<T> &net, const point<T> &from, const point<T> &to)
-            : __net(net),
-            __path(),
-            __from(from),
-            __to(to),
+        astar(const maze<T, Q> &seed)
+            : __maze(seed),
             __solved(false)
         {
             this->reset();
@@ -25,8 +23,7 @@ namespace glnav
 
         void iterate()
         {
-            // Check for version update
-            if(this->__net.version() != this->__version) this->reset();
+            if(!this->__maze.is_valid()) throw std::runtime_error("Invalid maze");
 
             if(this->__open_set.size() == 0) {
                 this->__solved = true;
@@ -48,20 +45,19 @@ namespace glnav
             this->__open_set.remove(current);
 
             // Check for completion
-            if(current == this->__to) {
+            if(current == this->__maze.finish()) {
                 this->__solved = true;
                 return;
             }
 
-            const neighborhood<T, double> neighbors = this->__net.neighbors(current);
+            const neighborhood<T, Q> neighbors = this->__maze.neighbors(current);
             assert(neighbors.size() > 0);
             for(size_t i = 0; i < neighbors.size(); i++)
             {
-                const double tentative = this->__gscore.cost(current) + neighbors.at(i).cost;
-                const point<T> &neighbor = neighbors.at(i);
+                const Q tentative = this->__gscore.cost(current) + neighbors.at(i).cost;
+                const point<T> neighbor = neighbors.at(i).location();
                 if(tentative < this->__gscore.cost(neighbor))
                 {
-                    this->__path.set(neighbor, current);
                     this->__gscore.set(neighbor, tentative);
                     this->__fscore.set(neighbor, tentative + this->__heuristic(neighbor));
                     if(!this->__open_set.contains(neighbor)) this->__open_set.push_back(neighbor);
@@ -71,54 +67,70 @@ namespace glnav
 
         bool is_solved() const { return this->__solved; }
 
-        point_group<T> route() const
+        route<T, Q> build_route() const
         {
-            point_group<T> result;
-            if(!this->__solved) return result;
-            assert(this->__net.contains(this->__from));
-            assert(this->__net.contains(this->__to));
-            if(!this->__path.contains(this->__to)) return result;
-            point<T> current = this->__to;
-            while(current != this->__from)
+            route<T, Q> result;
+            if(!this->is_solved()) return result;
+
+            point<T> current = this->__maze.finish();
+
+            while(current != this->__maze.start())
             {
-                result.push_back(current);
-                const point<T> * next = this->__path.get(current);
-                assert(next != nullptr);
-                current = *next; 
+                const neighborhood<T, Q> neighbors = this->__maze.neighbors(current);
+                assert(neighbors.size() > 0);
+                point<T> next = neighbors.at(0).location();
+                double cost = this->__gscore.cost(next);
+                for(size_t i = 1; i < neighbors.size(); i++)
+                {
+                    if(this->__gscore.cost(neighbors.at(i).location()) < cost) {
+                        next = neighbors.at(i).location();
+                        cost = this->__gscore.cost(next);
+                    }
+                }
+
+                // Check for loop
+                for(size_t i = 0; i < result.size(); i++)
+                {
+                    if(result[i].target == next) throw std::runtime_error("Loop detected");
+                }
+
+                // Set the speed
+                const Q delta_cost = this->__gscore.cost(current) - this->__gscore.cost(next);
+                const path<T> next_path = path<T>(current, next);
+                const Q distance = glnav::length<T, Q>(next_path);
+
+                // Set the new waypoint
+                result.push_front(heading<T, Q>(current, distance / delta_cost));
+                
+                // Move the points
+                current = next;
             }
-            result.push_back(this->__from);
-            std::reverse(result.begin(), result.end());
+
             return result;
         }
 
         void reset()
         {
-            if(!this->__net.contains(this->__from)) throw std::runtime_error("Network does not contain origin");
-            if(!this->__net.contains(this->__to)) throw std::runtime_error("Network does not contain destination");
-            this->__gscore = cost_map<T>(this->__net);
-            this->__gscore.set(this->__from, 0.0);
-            this->__fscore = cost_map<T>(this->__net);
-            this->__fscore.set(this->__from, this->__heuristic(this->__from));
+            if(!this->__maze.is_valid()) throw std::runtime_error("Invalid maze");
+            this->__gscore = cost_map<T, Q>(this->__maze);
+            this->__gscore.set(this->__maze.start(), 0.0);
+            this->__fscore = cost_map<T, Q>(this->__maze);
+            this->__fscore.set(this->__maze.start(), this->__heuristic(this->__maze.start()));
             this->__open_set.clear();
-            this->__open_set.push_back(this->__from);
+            this->__open_set.push_back(this->__maze.start());
             this->__solved = false;
-            this->__version = this->__net.version();
         }
     private:
-        double __heuristic(const point<T> &point)
+        Q __heuristic(const point<T> &point)
         {
-            return (point - this->__to).magnitude();
+            return magnitude<T, Q>(point - this->__maze.finish());
         }
 
-        network<T> &__net;
-        cost_map<T> __gscore;
-        cost_map<T> __fscore;
+        const maze<T, Q> &__maze;
+        cost_map<T, Q> __gscore;
+        cost_map<T, Q> __fscore;
         point_group<T> __open_set;
-        point_map<T, point<T> > __path;
-        point<T> __from;
-        point<T> __to;
         bool __solved;
-        version_t __version;
     };
 }
 
