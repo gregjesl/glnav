@@ -52,6 +52,20 @@ namespace glnav
             }
             return result;
         }
+
+        bool traverses(const network<T, Q> &net) const
+        {
+            if(this->empty()) return false;
+            typename std::deque<heading<T, Q> >::const_iterator it, last;
+            last = this->begin();
+            for(it = this->begin(); it != this->end(); ++it)
+            {
+                if(!net.contains(it->target)) return false;
+                if(it != last && !net.contains(path<T>(last->target, it->target))) return false;
+                last = it;
+            }
+            return true;
+        }
     };
 }
 

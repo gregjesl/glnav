@@ -11,6 +11,15 @@ int main(void)
     test.push_back(glnav::heading<double, double>(target, 1));
     TEST_TRUE(test.target() == target);
 
+    {
+        glnav::network<double, double> net;
+        TEST_FALSE(test.traverses(net));
+        net.add(glnav::path<double>(start, midpoint), 3);
+        net.add(glnav::path<double>(midpoint, target), 3);
+        TEST_TRUE(test.traverses(net));
+    }
+    
+
     glnav::travel_result<double, double> result = test.follow(start, 1);
     TEST_TRUE(result.target == midpoint);
     TEST_TRUE(result.location.x > 0.99 && result.location.x < 1.01);
